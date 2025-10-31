@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Android emulator service
+  android-emulator:
+    image: budtmo/docker-android:emulator_11.0
+    privileged: true
+    environment:
+      - EMULATOR_DEVICE=Samsung Galaxy S10
+      - WEB_VNC=true
+      - APPIUM=true
+    ports:
+      - "6080:6080"  # VNC web interface
+      - "5554:5554"  # Emulator console
+      - "5555:5555"  # ADB
+      - "4723:4723"  # Appium
+    volumes:
+      - ./apps:/root/tmp
+
+  # Test runner service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - android-emulator
+    environment:
+      - APPIUM_HOST=android-emulator
+      - APPIUM_PORT=4723
+      - ANDROID_DEVICE_NAME=emulator-5554
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./reports:/app/reports
+    command: npm run test:android
