@@ -13,6 +13,7 @@ declare global {
 
   // Global test utilities
   var expect: Chai.ExpectStatic;
+  var chaiExpect: Chai.ExpectStatic;
   var assert: Chai.AssertStatic;
   var should: Chai.Should;
 }

@@ -1,7 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 import { expect } from 'chai';
 import { logger } from '../../../utils/logger';
 import { Assertions } from '../../../utils/assertions';
+
+// ESM has no __dirname; derive the equivalent from import.meta.url
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Framework Verification Tests

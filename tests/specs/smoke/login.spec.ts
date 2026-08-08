@@ -24,7 +24,7 @@ describe('Login Feature', () => {
 
       // Verify login page is displayed
       await Assertions.assertDisplayed(
-        LoginPage['loginButton'] as any,
+        LoginPage['loginButton'] as unknown as WebdriverIO.Element,
         'Login button should be displayed'
       );
 

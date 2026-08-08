@@ -68,7 +68,7 @@ if (-not $allDirsOk) { exit 1 }
 
 # Step 7: Config files
 Write-Host "7. Checking configuration files..." -ForegroundColor Yellow
-$files = @("package.json", "tsconfig.json", ".eslintrc.js", "config/wdio.conf.ts")
+$files = @("package.json", "tsconfig.json", "eslint.config.js", "config/wdio.conf.ts")
 $allFilesOk = $true
 foreach ($file in $files) {
     if (Test-Path $file) {

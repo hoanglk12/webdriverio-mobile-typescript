@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
+    "module": "ESNext",
     "lib": ["ES2022"],
     "outDir": "./dist",
     "rootDir": ".",
@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -26,22 +26,6 @@
     "types": ["node", "mocha", "chai"],
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*",
-    "config/**/*",
-    "utils/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "reports"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
-    },
-    "transpileOnly": true,
-    "files": true
-  }
+  "include": ["src/**/*", "tests/**/*", "config/**/*", "utils/**/*"],
+  "exclude": ["node_modules", "dist", "reports"]
 }

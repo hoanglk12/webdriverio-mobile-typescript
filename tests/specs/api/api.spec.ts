@@ -1,8 +1,19 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
+import { isAxiosError } from 'axios';
 import apiClient from '../../../utils/apiClient';
 import { logger } from '../../../utils/logger';
 import AllureReporter from '@wdio/allure-reporter';
+
+interface LoginResponse {
+  token: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
 
 describe('API Integration Tests', () => {
   describe('User Authentication API', () => {
@@ -11,7 +22,7 @@ describe('API Integration Tests', () => {
       AllureReporter.addStory('User Authentication');
 
       try {
-        const response = await apiClient.post('/auth/login', {
+        const response = await apiClient.post<LoginResponse>('/auth/login', {
           username: 'testuser@example.com',
           password: 'Test@1234',
         });
@@ -22,8 +33,9 @@ describe('API Integration Tests', () => {
 
         logger.info(`Authentication successful. Token: ${response.data.token.substring(0, 20)}...`);
         AllureReporter.addStep('API authentication successful');
-      } catch (error: any) {
-        logger.error(`API authentication failed: ${error.message}`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.error(`API authentication failed: ${message}`);
         throw error;
       }
     });
@@ -39,8 +51,9 @@ describe('API Integration Tests', () => {
 
         // Should not reach here
         expect.fail('Expected authentication to fail');
-      } catch (error: any) {
-        expect(error.response?.status).to.equal(401);
+      } catch (error) {
+        const status = isAxiosError(error) ? error.response?.status : undefined;
+        expect(status).to.equal(401);
         logger.info('Invalid credentials correctly rejected');
         AllureReporter.addStep('Invalid credentials rejected as expected');
       }
@@ -52,7 +65,7 @@ describe('API Integration Tests', () => {
 
     before(async () => {
       // Get auth token
-      const response = await apiClient.post('/auth/login', {
+      const response = await apiClient.post<LoginResponse>('/auth/login', {
         username: 'testuser@example.com',
         password: 'Test@1234',
       });
@@ -63,7 +76,7 @@ describe('API Integration Tests', () => {
     it('should fetch product list', async () => {
       AllureReporter.addStory('Get Products');
 
-      const response = await apiClient.get('/products');
+      const response = await apiClient.get<Product[]>('/products');
 
       expect(response.status).to.equal(200);
       expect(response.data).to.be.an('array');
@@ -77,7 +90,7 @@ describe('API Integration Tests', () => {
       AllureReporter.addStory('Get Product Details');
 
       const productId = 1;
-      const response = await apiClient.get(`/products/${productId}`);
+      const response = await apiClient.get<Product>(`/products/${productId}`);
 
       expect(response.status).to.equal(200);
       expect(response.data).to.have.property('id');

@@ -68,7 +68,7 @@ export class ApiClient {
    * @param config - Axios config
    * @returns Promise with response
    */
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return await this.client.get<T>(url, config);
   }
 
@@ -79,9 +79,9 @@ export class ApiClient {
    * @param config - Axios config
    * @returns Promise with response
    */
-  async post<T = any>(
+  async post<T = unknown, D = unknown>(
     url: string,
-    data?: any,
+    data?: D,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
     return await this.client.post<T>(url, data, config);
@@ -94,9 +94,9 @@ export class ApiClient {
    * @param config - Axios config
    * @returns Promise with response
    */
-  async put<T = any>(
+  async put<T = unknown, D = unknown>(
     url: string,
-    data?: any,
+    data?: D,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
     return await this.client.put<T>(url, data, config);
@@ -109,9 +109,9 @@ export class ApiClient {
    * @param config - Axios config
    * @returns Promise with response
    */
-  async patch<T = any>(
+  async patch<T = unknown, D = unknown>(
     url: string,
-    data?: any,
+    data?: D,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
     return await this.client.patch<T>(url, data, config);
@@ -123,7 +123,7 @@ export class ApiClient {
    * @param config - Axios config
    * @returns Promise with response
    */
-  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     return await this.client.delete<T>(url, config);
   }
 }

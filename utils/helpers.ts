@@ -17,7 +17,7 @@ export async function waitForCondition(
       if (await condition()) {
         return true;
       }
-    } catch (error) {
+    } catch {
       // Continue waiting if condition throws error
     }
     await new Promise((resolve) => setTimeout(resolve, interval));

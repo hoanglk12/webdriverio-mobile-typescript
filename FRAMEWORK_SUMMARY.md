@@ -11,7 +11,7 @@ This is a **production-ready, enterprise-grade mobile automation framework** bui
 #### Core Configuration
 - `package.json` - All dependencies and npm scripts
 - `tsconfig.json` - TypeScript strict configuration
-- `.eslintrc.js` - Code linting rules
+- `eslint.config.js` - Code linting rules (flat config)
 - `.prettierrc` - Code formatting rules
 - `.gitignore` - Git ignore patterns
 - `.env.example` - Environment variable template
@@ -203,15 +203,15 @@ This is a **production-ready, enterprise-grade mobile automation framework** bui
 | Category | Technology | Version |
 |----------|-----------|---------|
 | **Test Framework** | Mocha | 10.x |
-| **Assertion Library** | Chai | 4.x |
-| **Automation Driver** | WebdriverIO | 8.27+ |
-| **Mobile Driver** | Appium | 2.4+ |
-| **Language** | TypeScript | 5.3+ |
-| **Reporting** | Allure | 2.25+ |
-| **Logging** | Winston | 3.11+ |
-| **API Client** | Axios | 1.6+ |
-| **Linting** | ESLint | 8.x |
-| **Formatting** | Prettier | 3.x |
+| **Assertion Library** | Chai | 6.x (ESM) |
+| **Automation Driver** | WebdriverIO | 9.30+ |
+| **Mobile Driver** | Appium | 3.6+ |
+| **Language** | TypeScript | 6.0+ |
+| **Reporting** | Allure | 2.43+ |
+| **Logging** | Winston | 3.19+ |
+| **API Client** | Axios | 1.19+ |
+| **Linting** | ESLint | 10.x (flat config) |
+| **Formatting** | Prettier | 3.9+ |
 | **CI/CD** | GitHub Actions | - |
 | **Containerization** | Docker | - |
 

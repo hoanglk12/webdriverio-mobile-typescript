@@ -25,7 +25,7 @@ on:
         default: 'all'
 
 env:
-  NODE_VERSION: '18.x'
+  NODE_VERSION: '24.x'
   ANDROID_API_LEVEL: 30
   ANDROID_ARCH: x86_64
 

@@ -9,8 +9,8 @@ Write-Host ""
 Write-Host "Checking Node.js version..." -ForegroundColor Yellow
 $nodeVersion = node -v
 $nodeMajorVersion = [int]($nodeVersion -replace 'v', '' -split '\.')[0]
-if ($nodeMajorVersion -lt 18) {
-    Write-Host "Error: Node.js version 18 or higher is required" -ForegroundColor Red
+if ($nodeMajorVersion -lt 20) {
+    Write-Host "Error: Node.js version 20.19+, 22.12+, or 24+ is required (appium@3 / eslint@10)" -ForegroundColor Red
     Write-Host "Current version: $nodeVersion" -ForegroundColor Red
     exit 1
 }

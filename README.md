@@ -3,11 +3,11 @@
 [![CI/CD](https://github.com/your-org/webdriverio-mobile-typescript/actions/workflows/mobile-tests.yml/badge.svg)](https://github.com/your-org/webdriverio-mobile-typescript/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Enterprise-grade Mobile Automation Framework** built with WebdriverIO v8, Mocha, Chai, and TypeScript for Android and iOS testing.
+> **Enterprise-grade Mobile Automation Framework** built with WebdriverIO v9, Mocha, Chai, and TypeScript (native ESM) for Android and iOS testing.
 
 ## 🚀 Features
 
-- ✅ **WebdriverIO v8+** - Latest automation driver with full TypeScript support
+- ✅ **WebdriverIO v9+** - Latest automation driver with full TypeScript support
 - ✅ **Mocha Framework** - Flexible BDD/TDD test framework
 - ✅ **Chai Assertions** - Fluent assertion library with custom mobile assertions
 - ✅ **TypeScript** - Type safety and enhanced IDE support
@@ -41,10 +41,10 @@
 
 ### Required Software
 
-- **Node.js** >= 18.0.0
-- **npm** >= 9.0.0
+- **Node.js** `^20.19.0 || ^22.12.0 || >=24.0.0` (required by appium@3 / eslint@10)
+- **npm** >= 10.0.0
 - **Java JDK** >= 11 (for Appium)
-- **Appium** >= 2.0.0
+- **Appium** >= 3.0.0
 
 ### For Android Testing
 
@@ -80,7 +80,7 @@ npm install
 
 ```bash
 # Install Appium globally
-npm install -g appium@next
+npm install -g appium
 
 # Install drivers
 appium driver install uiautomator2  # For Android
@@ -152,7 +152,7 @@ webdriverio-mobile-typescript/
 ├── apps/                         # Mobile app binaries
 │   ├── android/
 │   └── ios/
-├── .eslintrc.js                  # ESLint configuration
+├── eslint.config.js              # ESLint configuration (flat config)
 ├── .prettierrc                   # Prettier configuration
 ├── tsconfig.json                 # TypeScript configuration
 ├── package.json                  # Node.js dependencies

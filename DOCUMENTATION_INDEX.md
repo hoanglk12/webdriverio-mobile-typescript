@@ -66,7 +66,7 @@ Framework Structure:
 - **Android Config**: [config/wdio.android.conf.ts](config/wdio.android.conf.ts)
 - **iOS Config**: [config/wdio.ios.conf.ts](config/wdio.ios.conf.ts)
 - **TypeScript**: [tsconfig.json](tsconfig.json)
-- **ESLint**: [.eslintrc.js](.eslintrc.js)
+- **ESLint**: [eslint.config.js](eslint.config.js)
 - **Prettier**: [.prettierrc](.prettierrc)
 
 ## 🧪 Test Examples

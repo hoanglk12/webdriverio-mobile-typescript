@@ -94,7 +94,7 @@ echo -e "${YELLOW}7. Checking required configuration files...${NC}"
 REQUIRED_FILES=(
     "package.json"
     "tsconfig.json"
-    ".eslintrc.js"
+    "eslint.config.js"
     ".prettierrc"
     "config/wdio.conf.ts"
     "config/wdio.android.conf.ts"

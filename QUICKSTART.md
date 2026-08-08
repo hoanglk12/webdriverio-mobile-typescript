@@ -4,8 +4,8 @@ Get up and running with the Mobile Automation Framework in minutes!
 
 ## Prerequisites Checklist
 
-- [ ] Node.js 18+ installed
-- [ ] npm 9+ installed
+- [ ] Node.js 20.19+, 22.12+, or 24+ installed (required by appium@3 / eslint@10)
+- [ ] npm 10+ installed
 - [ ] Java JDK 11+ installed
 - [ ] Android SDK installed (for Android testing)
 - [ ] Xcode installed (for iOS testing, macOS only)
@@ -23,7 +23,7 @@ cd webdriverio-mobile-typescript
 npm install
 
 # Install Appium and drivers
-npm install -g appium@next
+npm install -g appium
 appium driver install uiautomator2
 ```
 

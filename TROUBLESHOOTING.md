@@ -23,10 +23,10 @@ Common issues and solutions for the Mobile Automation Framework.
 # Check Node version
 node --version
 
-# Should be >= 18.0.0
+# Should satisfy: ^20.19.0 || ^22.12.0 || >=24.0.0 (required by appium@3 / eslint@10)
 # Install correct version using nvm
-nvm install 18
-nvm use 18
+nvm install 22
+nvm use 22
 ```
 
 ### npm Install Fails

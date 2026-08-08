@@ -19,8 +19,8 @@ NC='\033[0m' # No Color
 # Check Node.js version
 echo "Checking Node.js version..."
 NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-if [ "$NODE_VERSION" -lt 18 ]; then
-    echo -e "${RED}Error: Node.js version 18 or higher is required${NC}"
+if [ "$NODE_VERSION" -lt 20 ]; then
+    echo -e "${RED}Error: Node.js version 20.19+, 22.12+, or 24+ is required (appium@3 / eslint@10)${NC}"
     echo "Current version: $(node -v)"
     exit 1
 fi

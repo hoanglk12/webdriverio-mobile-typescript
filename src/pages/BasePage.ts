@@ -138,7 +138,10 @@ export abstract class BasePage {
    * @param attribute - Attribute name
    * @returns Attribute value
    */
-  protected async getAttribute(element: WebdriverIO.Element, attribute: string): Promise<string> {
+  protected async getAttribute(
+    element: WebdriverIO.Element,
+    attribute: string
+  ): Promise<string | null> {
     try {
       await this.waitForElementDisplayed(element);
       const value = await element.getAttribute(attribute);
@@ -159,9 +162,9 @@ export abstract class BasePage {
    */
   protected async isDisplayed(element: ElementType): Promise<boolean> {
     try {
-      const el = element as any;
+      const el = element as WebdriverIO.Element;
       return await el.isDisplayed();
-    } catch (error) {
+    } catch {
       logger.debug(`Element not displayed`);
       return false;
     }
@@ -175,7 +178,7 @@ export abstract class BasePage {
   protected async isExisting(element: WebdriverIO.Element): Promise<boolean> {
     try {
       return await element.isExisting();
-    } catch (error) {
+    } catch {
       logger.debug(`Element does not exist: ${await element.selector}`);
       return false;
     }

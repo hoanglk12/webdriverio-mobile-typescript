@@ -1,7 +1,7 @@
 import { config as baseConfig } from './wdio.conf';
 import { config as dotenvConfig } from 'dotenv';
 
-dotenvConfig();
+dotenvConfig({ quiet: true });
 
 export const config: WebdriverIO.Config = {
   ...baseConfig,

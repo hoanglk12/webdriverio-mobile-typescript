@@ -1,11 +1,11 @@
-import type { Options } from '@wdio/types';
+import type { Options, Frameworks } from '@wdio/types';
 import { config as dotenvConfig } from 'dotenv';
 import AllureReporter from '@wdio/allure-reporter';
 import { logger } from '../utils/logger';
 
-dotenvConfig();
+dotenvConfig({ quiet: true });
 
-export const config: any = {
+export const config: WebdriverIO.Config = {
   //
   // ==================
   // Runner Configuration
@@ -103,7 +103,6 @@ export const config: any = {
   mochaOpts: {
     ui: 'bdd',
     timeout: parseInt(process.env.DEFAULT_TIMEOUT || '60000'),
-    require: ['tsconfig-paths/register'],
     retries: 1,
   },
 
@@ -135,9 +134,9 @@ export const config: any = {
     // Import Chai and setup assertions
     const chai = await import('chai');
     // Note: WebdriverIO v9 has built-in expect, but we keep Chai for compatibility
-    (global as any).chaiExpect = chai.expect;
+    global.chaiExpect = chai.expect;
     global.assert = chai.assert;
-    (global as any).should = chai.should();
+    global.should = chai.should();
 
     // Set implicit wait (renamed from setImplicitTimeout)
     await browser.setTimeout({ implicit: parseInt(process.env.IMPLICIT_WAIT || '5000') });
@@ -155,21 +154,25 @@ export const config: any = {
   /**
    * Hook that gets executed before the suite starts
    */
-  beforeSuite: function (suite: any) {
+  beforeSuite: function (suite: Frameworks.Suite) {
     logger.info(`Starting suite: ${suite.title}`);
   },
 
   /**
    * Hook that gets executed before test execution
    */
-  beforeTest: function (test: any) {
+  beforeTest: function (test: Frameworks.Test) {
     logger.info(`Starting test: ${test.title}`);
   },
 
   /**
    * Hook that gets executed after a test
    */
-  afterTest: async function (test: any, _context: any, { passed }: any) {
+  afterTest: async function (
+    test: Frameworks.Test,
+    _context: unknown,
+    { passed }: Frameworks.TestResult
+  ) {
     if (!passed) {
       logger.error(`Test failed: ${test.title}`);
 
@@ -198,7 +201,7 @@ export const config: any = {
   /**
    * Hook that gets executed after the suite has ended
    */
-  afterSuite: function (suite: any) {
+  afterSuite: function (suite: Frameworks.Suite) {
     logger.info(`Completed suite: ${suite.title}`);
   },
 
