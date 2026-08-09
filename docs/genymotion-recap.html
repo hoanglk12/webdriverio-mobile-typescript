@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genymotion + WebdriverIO session recap</title>
+<style>
+  :root {
+    --bg: #F1F3F6;
+    --surface: #FFFFFF;
+    --surface-2: #F7F8FA;
+    --ink: #12161C;
+    --ink-muted: #576273;
+    --line: #DEE3EA;
+    --accent: #0E7C86;
+    --accent-strong: #0B646D;
+    --accent-bg: rgba(14, 124, 134, 0.08);
+    --good: #1F8A5F;
+    --good-bg: rgba(31, 138, 95, 0.09);
+    --bad: #B8461F;
+    --bad-bg: rgba(184, 70, 31, 0.09);
+    --accent-on: #FFFFFF;
+    --bad-on: #FFFFFF;
+    --shadow: 0 1px 2px rgba(18, 22, 28, 0.04), 0 8px 24px -12px rgba(18, 22, 28, 0.12);
+
+    --font-sans: "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, "Roboto Mono", "Noto Sans Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11151B;
+      --surface: #181D24;
+      --surface-2: #1E2430;
+      --ink: #E7ECF2;
+      --ink-muted: #97A2B3;
+      --line: #2A313D;
+      --accent: #4FD1DB;
+      --accent-strong: #8CE6ED;
+      --accent-bg: rgba(79, 209, 219, 0.10);
+      --good: #4ECB93;
+      --good-bg: rgba(78, 203, 147, 0.12);
+      --bad: #E28A62;
+      --bad-bg: rgba(226, 138, 98, 0.13);
+      --accent-on: #04141A;
+      --bad-on: #241006;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11151B;
+    --surface: #181D24;
+    --surface-2: #1E2430;
+    --ink: #E7ECF2;
+    --ink-muted: #97A2B3;
+    --line: #2A313D;
+    --accent: #4FD1DB;
+    --accent-strong: #8CE6ED;
+    --accent-bg: rgba(79, 209, 219, 0.10);
+    --good: #4ECB93;
+    --good-bg: rgba(78, 203, 147, 0.12);
+    --bad: #E28A62;
+    --bad-bg: rgba(226, 138, 98, 0.13);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-bg); color: var(--ink); }
+
+  a { color: var(--accent-strong); }
+
+  .wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 24px 96px;
+  }
+
+  code, .mono { font-family: var(--font-mono); }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .masthead-text { min-width: 0; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(26px, 4vw, 34px);
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .subtitle {
+    color: var(--ink-muted);
+    font-size: 16.5px;
+    max-width: 56ch;
+    margin: 0 0 14px;
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+
+  .lang-switch {
+    flex: none;
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+  }
+  .lang-switch button {
+    appearance: none;
+    border: 0;
+    background: var(--surface);
+    color: var(--ink-muted);
+    padding: 8px 13px;
+    cursor: pointer;
+    font: inherit;
+  }
+  .lang-switch button + button { border-left: 1px solid var(--line); }
+  .lang-switch button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-on);
+  }
+  .lang-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* ---------- At a glance ---------- */
+  .glance {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .chip-label {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0 0 8px;
+  }
+  .chip-value {
+    font-size: 14.5px;
+    margin: 0 0 10px;
+    word-break: break-word;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 3px 9px 3px 7px;
+    border-radius: 100px;
+  }
+  .status::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status.good { background: var(--good-bg); color: var(--good); }
+  .status.bad  { background: var(--bad-bg); color: var(--bad); }
+  .status.accent { background: var(--accent-bg); color: var(--accent-strong); }
+
+  /* ---------- Section headings ---------- */
+  section { margin-top: 56px; }
+  h2 {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .section-note {
+    color: var(--ink-muted);
+    font-size: 14.5px;
+    max-width: 62ch;
+    margin: 0 0 26px;
+  }
+
+  /* ---------- Timeline ---------- */
+  .timeline { list-style: none; margin: 0; padding: 0; }
+  .entry {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 0 18px;
+  }
+  .entry-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .entry-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+  .entry-line {
+    width: 1px;
+    flex: 1;
+    background: var(--line);
+    margin: 4px 0;
+  }
+  .entry:last-child .entry-line { display: none; }
+  .entry-body { padding-bottom: 34px; }
+  .entry-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .entry-tag {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+  }
+  .entry-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .entry pre {
+    margin: 10px 0;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 13px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .entry pre code { color: var(--bad); }
+  .entry dl { margin: 12px 0 0; display: grid; gap: 10px; }
+  .entry dt {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0 0 3px;
+  }
+  .entry dd { margin: 0; font-size: 15px; }
+
+  /* ---------- Table ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+  thead th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface-2);
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    background: var(--surface);
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.file { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent-strong); white-space: nowrap; }
+
+  /* ---------- Device mockup ---------- */
+  .device-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 260px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 560px) {
+    .device-wrap { grid-template-columns: 1fr; }
+  }
+  .phone {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    padding: 8px;
+  }
+  .phone-screen {
+    background: var(--surface-2);
+    border-radius: 15px;
+    overflow: hidden;
+    font-size: 11px;
+  }
+  .phone-status {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .phone-body { padding: 6px 12px 10px; }
+  .phone-h1 { font-size: 17px; font-weight: 700; margin: 4px 0 8px; }
+  .phone-search {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 7px 10px;
+    color: var(--ink-muted);
+    font-size: 10.5px;
+    margin-bottom: 8px;
+  }
+  .phone-pills { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+  .phone-pill {
+    border-radius: 100px;
+    padding: 4px 9px;
+    font-size: 9.5px;
+    border: 1px solid var(--line);
+    color: var(--ink-muted);
+  }
+  .phone-pill.active { background: var(--bad); color: var(--bad-on); border-color: var(--bad); }
+  .phone-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .phone-card-art {
+    height: 58px;
+    background: linear-gradient(135deg, #4A5A7A, #7A8FB5);
+    position: relative;
+  }
+  .phone-card-badge {
+    position: absolute; top: 6px; left: 6px;
+    background: var(--bad); color: var(--bad-on);
+    font-size: 7.5px; letter-spacing: 0.05em;
+    padding: 2px 6px; border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .phone-card-body { padding: 7px 9px 9px; }
+  .phone-card-title { font-size: 11px; font-weight: 700; margin: 0 0 2px; }
+  .phone-card-sub { font-size: 9.5px; color: var(--ink-muted); margin: 0 0 3px; }
+  .phone-card-row { display: flex; justify-content: space-between; align-items: flex-end; }
+  .phone-card-meta { font-size: 8.5px; color: var(--ink-muted); }
+  .phone-card-price { font-size: 9px; font-weight: 700; color: var(--bad); text-align: right; }
+  .phone-card-price small { display: block; font-weight: 400; color: var(--ink-muted); font-size: 7px; }
+  .phone-end { text-align: center; font-size: 9px; color: var(--ink-muted); margin: 8px 0 10px; }
+  .phone-nav {
+    display: flex;
+    border-top: 1px solid var(--line);
+    padding-top: 7px;
+  }
+  .phone-nav div { flex: 1; text-align: center; font-size: 8px; color: var(--ink-muted); }
+  .phone-nav div.active { color: var(--bad); font-weight: 700; }
+  .phone-nav .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin: 0 auto 2px; opacity: 0.55; }
+
+  .device-note {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--bad);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    font-size: 14.5px;
+  }
+  .device-note code { color: var(--bad); }
+  .device-note + .device-note { margin-top: 12px; border-left-color: var(--line); }
+
+  /* ---------- Next / footer ---------- */
+  .next {
+    background: var(--accent-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .next h2 { margin-bottom: 8px; }
+  .next p { margin: 0; font-size: 15px; max-width: 60ch; }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
+  @media (max-width: 620px) {
+    .masthead { flex-direction: column; }
+    .glance { grid-template-columns: 1fr; }
+    .entry { grid-template-columns: 26px 1fr; gap: 0 12px; }
+    .entry-num { width: 24px; height: 24px; font-size: 10.5px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .chip, .entry-body, .phone { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="masthead-text">
+      <p class="eyebrow t" data-en="Field notes / Android + Genymotion" data-vi="Ghi chú thực địa / Android + Genymotion">Field notes / Android + Genymotion</p>
+      <h1 class="t" data-en="Getting a Genymotion device talking to WebdriverIO" data-vi="Kết nối thiết bị Genymotion với WebdriverIO">Getting a Genymotion device talking to WebdriverIO</h1>
+      <p class="subtitle t" data-en="Five infrastructure problems, found and fixed one at a time, before a WebdriverIO session would hold against a live app screen." data-vi="Năm vấn đề hạ tầng, được phát hiện và xử lý lần lượt, trước khi một phiên WebdriverIO có thể chạy ổn định với màn hình ứng dụng thật.">Five infrastructure problems, found and fixed one at a time, before a WebdriverIO session would hold against a live app screen.</p>
+      <p class="meta t" data-en="Session recap · Aug 9, 2026 · webdriverio-mobile-typescript" data-vi="Tổng kết phiên · 09/08/2026 · webdriverio-mobile-typescript">Session recap · Aug 9, 2026 · webdriverio-mobile-typescript</p>
+    </div>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" id="btn-en" aria-pressed="true" onclick="setLang('en')">EN</button>
+      <button type="button" id="btn-vi" aria-pressed="false" onclick="setLang('vi')">VI</button>
+    </div>
+  </header>
+
+  <div class="glance">
+    <div class="chip">
+      <p class="chip-label t" data-en="Device" data-vi="Thiết bị">Device</p>
+      <p class="chip-value mono">Genymotion · Galaxy S24<br>Android 13 (API 33) · x86_64</p>
+      <span class="status good"><span class="t" data-en="Online" data-vi="Đang hoạt động">Online</span></span>
+    </div>
+    <div class="chip">
+      <p class="chip-label t" data-en="App" data-vi="Ứng dụng">App</p>
+      <p class="chip-value mono">FrontRow v0.1.0<br>app.frontrow.qa</p>
+      <span class="status good"><span class="t" data-en="Installed, launches clean" data-vi="Đã cài đặt, khởi chạy ổn định">Installed, launches clean</span></span>
+    </div>
+    <div class="chip">
+      <p class="chip-label t" data-en="Test run" data-vi="Lượt kiểm thử">Test run</p>
+      <p class="chip-value mono">tests/specs/smoke/<br>login.spec.ts</p>
+      <span class="status bad"><span class="t" data-en="Fails as expected" data-vi="Thất bại đúng như dự kiến">Fails as expected</span></span>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="t" data-en="What broke, in order" data-vi="Những gì đã hỏng, theo thứ tự">What broke, in order</h2>
+    <p class="section-note t" data-en="Each fix uncovered the next problem. The order below is the order they actually appeared, not a curated list." data-vi="Mỗi lần sửa lại lộ ra một vấn đề mới. Thứ tự dưới đây là thứ tự chúng thực sự xuất hiện, không phải một danh sách được sắp xếp lại.">Each fix uncovered the next problem. The order below is the order they actually appeared, not a curated list.</p>
+
+    <ol class="timeline">
+
+      <li class="entry">
+        <div class="entry-rail"><div class="entry-num">01</div><div class="entry-line"></div></div>
+        <div class="entry-body">
+          <div class="entry-head">
+            <span class="entry-tag t" data-en="LICENSE" data-vi="GIẤY PHÉP">LICENSE</span>
+            <h3 class="entry-title t" data-en="Genymotion's CLI didn't know it was licensed" data-vi="Công cụ dòng lệnh của Genymotion không nhận ra đã có giấy phép">Genymotion's CLI didn't know it was licensed</h3>
+          </div>
+          <pre><code>$ gmtool admin osimages
+A license is required to use this feature</code></pre>
+          <dl>
+            <div>
+              <dt class="t" data-en="Cause" data-vi="Nguyên nhân">Cause</dt>
+              <dd class="t" data-en="Genymotion Desktop showed an active Personal Use license, but gmtool runs its own license check and hadn't picked it up. Clearing its cache only triggered a rate limit." data-vi="Genymotion Desktop hiển thị giấy phép Personal Use đang hoạt động, nhưng gmtool tự kiểm tra giấy phép riêng và chưa nhận được thông tin đó. Xóa cache của gmtool chỉ khiến nó bị giới hạn tần suất gọi.">Genymotion Desktop showed an active Personal Use license, but gmtool runs its own license check and hadn't picked it up. Clearing its cache only triggered a rate limit.</dd>
+            </div>
+            <div>
+              <dt class="t" data-en="Fix" data-vi="Cách xử lý">Fix</dt>
+              <dd class="t" data-en="Created the virtual device from the Genymotion Desktop GUI instead: a Galaxy S24 profile running Android 13 (API 33, x86_64)." data-vi="Chuyển sang tạo thiết bị ảo trực tiếp từ giao diện Genymotion Desktop: cấu hình Galaxy S24 chạy Android 13 (API 33, x86_64).">Created the virtual device from the Genymotion Desktop GUI instead: a Galaxy S24 profile running Android 13 (API 33, x86_64).</dd>
+            </div>
+          </dl>
+        </div>
+      </li>
+
+      <li class="entry">
+        <div class="entry-rail"><div class="entry-num">02</div><div class="entry-line"></div></div>
+        <div class="entry-body">
+          <div class="entry-head">
+            <span class="entry-tag t" data-en="TIMEOUT" data-vi="HẾT THỜI GIAN CHỜ">TIMEOUT</span>
+            <h3 class="entry-title t" data-en="Appium never got to say it was ready" data-vi="Appium chưa kịp báo là đã sẵn sàng">Appium never got to say it was ready</h3>
+          </div>
+          <pre><code>Error: Timeout: Appium did not start within expected time</code></pre>
+          <dl>
+            <div>
+              <dt class="t" data-en="Cause" data-vi="Nguyên nhân">Cause</dt>
+              <dd class="t" data-en="Appium loads every installed driver at startup, not just the one a run needs. Loading uiautomator2 and xcuitest took 30 to 45 seconds on this machine; the WebdriverIO Appium service gives up after exactly 30." data-vi="Appium tải toàn bộ driver đã cài khi khởi động, chứ không chỉ driver cần dùng cho lần chạy đó. Việc tải uiautomator2 và xcuitest mất từ 30 đến 45 giây trên máy này, trong khi appium-service của WebdriverIO chỉ chờ đúng 30 giây rồi bỏ cuộc.">Appium loads every installed driver at startup, not just the one a run needs. Loading uiautomator2 and xcuitest took 30 to 45 seconds on this machine; the WebdriverIO Appium service gives up after exactly 30.</dd>
+            </div>
+            <div>
+              <dt class="t" data-en="Fix" data-vi="Cách xử lý">Fix</dt>
+              <dd class="t" data-en="Set appiumStartTimeout to 90000 in config/wdio.conf.ts." data-vi="Đặt appiumStartTimeout thành 90000 trong config/wdio.conf.ts.">Set appiumStartTimeout to 90000 in config/wdio.conf.ts.</dd>
+            </div>
+          </dl>
+        </div>
+      </li>
+
+      <li class="entry">
+        <div class="entry-rail"><div class="entry-num">03</div><div class="entry-line"></div></div>
+        <div class="entry-body">
+          <div class="entry-head">
+            <span class="entry-tag t" data-en="NETWORKING" data-vi="MẠNG">NETWORKING</span>
+            <h3 class="entry-title t" data-en="Appium was listening, the client still couldn't reach it" data-vi="Appium đã lắng nghe, nhưng client vẫn không kết nối được">Appium was listening, the client still couldn't reach it</h3>
+          </div>
+          <pre><code>WebDriverError: Request failed with error code ECONNREFUSED
+when running "http://127.0.0.1:4723/session"</code></pre>
+          <dl>
+            <div>
+              <dt class="t" data-en="Cause" data-vi="Nguyên nhân">Cause</dt>
+              <dd class="t" data-en="On this machine, Node resolves localhost to the IPv6 loopback address first. Appium bound to that address; the WebdriverIO client dials the IPv4 address by default. Two different sockets, same port number." data-vi="Trên máy này, Node phân giải localhost thành địa chỉ loopback IPv6 trước tiên. Appium gắn vào địa chỉ đó, còn client của WebdriverIO lại mặc định gọi tới địa chỉ IPv4. Hai socket khác nhau, cùng một số cổng.">On this machine, Node resolves localhost to the IPv6 loopback address first. Appium bound to that address; the WebdriverIO client dials the IPv4 address by default. Two different sockets, same port number.</dd>
+            </div>
+            <div>
+              <dt class="t" data-en="Fix" data-vi="Cách xử lý">Fix</dt>
+              <dd class="t" data-en="Set APPIUM_HOST to 127.0.0.1 in .env, so the server and the client agree on which loopback address to use." data-vi="Đặt APPIUM_HOST thành 127.0.0.1 trong .env để server và client thống nhất dùng cùng một địa chỉ loopback.">Set APPIUM_HOST to 127.0.0.1 in .env, so the server and the client agree on which loopback address to use.</dd>
+            </div>
+          </dl>
+        </div>
+      </li>
+
+      <li class="entry">
+        <div class="entry-rail"><div class="entry-num">04</div><div class="entry-line"></div></div>
+        <div class="entry-body">
+          <div class="entry-head">
+            <span class="entry-tag t" data-en="MISSING SDK" data-vi="THIẾU SDK">MISSING SDK</span>
+            <h3 class="entry-title t" data-en="The driver couldn't find adb" data-vi="Driver không tìm thấy adb">The driver couldn't find adb</h3>
+          </div>
+          <pre><code>WebDriverError: Neither ANDROID_HOME nor ANDROID_SDK_ROOT
+environment variable was exported</code></pre>
+          <dl>
+            <div>
+              <dt class="t" data-en="Cause" data-vi="Nguyên nhân">Cause</dt>
+              <dd class="t" data-en="No Android SDK had ever been installed on this machine. Genymotion ships its own copy of adb, but appium-adb reads the ANDROID_HOME environment variable, not the Windows PATH." data-vi="Máy này chưa từng cài Android SDK. Genymotion có kèm một bản adb riêng, nhưng appium-adb đọc biến môi trường ANDROID_HOME, chứ không dò theo PATH của Windows.">No Android SDK had ever been installed on this machine. Genymotion ships its own copy of adb, but appium-adb reads the ANDROID_HOME environment variable, not the Windows PATH.</dd>
+            </div>
+            <div>
+              <dt class="t" data-en="Fix" data-vi="Cách xử lý">Fix</dt>
+              <dd class="t" data-en="Pointed ANDROID_HOME at Genymotion's install folder as a first pass, since its tools/ directory happened to match one of appium-adb's search paths." data-vi="Bước đầu, trỏ ANDROID_HOME vào thư mục cài đặt của Genymotion, vì thư mục tools/ của nó tình cờ khớp với một trong các đường dẫn tìm kiếm của appium-adb.">Pointed ANDROID_HOME at Genymotion's install folder as a first pass, since its tools/ directory happened to match one of appium-adb's search paths.</dd>
+            </div>
+          </dl>
+        </div>
+      </li>
+
+      <li class="entry">
+        <div class="entry-rail"><div class="entry-num">05</div></div>
+        <div class="entry-body">
+          <div class="entry-head">
+            <span class="entry-tag t" data-en="ROOT CAUSE" data-vi="NGUYÊN NHÂN GỐC">ROOT CAUSE</span>
+            <h3 class="entry-title t" data-en="Genymotion's folder isn't an SDK" data-vi="Thư mục của Genymotion không phải là một SDK">Genymotion's folder isn't an SDK</h3>
+          </div>
+          <pre><code>Could not find 'aapt2.exe' in [...]
+Could not find 'apksigner.jar' in [...]</code></pre>
+          <dl>
+            <div>
+              <dt class="t" data-en="Cause" data-vi="Nguyên nhân">Cause</dt>
+              <dd class="t" data-en="Genymotion bundles adb and the older aapt, not the full Android build-tools. appium-adb needs aapt2 to read an APK's manifest and apksigner to check its signature before installing it. Setting appPackage and appActivity explicitly skipped the manifest read, but the signature check still needed apksigner." data-vi="Genymotion chỉ đi kèm adb và bản aapt cũ, không có đầy đủ Android build-tools. appium-adb cần aapt2 để đọc manifest của APK và cần apksigner để kiểm tra chữ ký trước khi cài đặt. Việc khai báo thẳng appPackage và appActivity giúp bỏ qua bước đọc manifest, nhưng bước kiểm tra chữ ký vẫn cần apksigner.">Genymotion bundles adb and the older aapt, not the full Android build-tools. appium-adb needs aapt2 to read an APK's manifest and apksigner to check its signature before installing it. Setting appPackage and appActivity explicitly skipped the manifest read, but the signature check still needed apksigner.</dd>
+            </div>
+            <div>
+              <dt class="t" data-en="Fix" data-vi="Cách xử lý">Fix</dt>
+              <dd class="t" data-en="Installed a real Android SDK (platform-tools plus build-tools 34.0.0) at C:\Android\Sdk, moved ANDROID_HOME there, and pointed Genymotion at that same SDK's adb, so only one adb version runs at a time." data-vi="Cài một Android SDK đầy đủ (platform-tools và build-tools 34.0.0) tại C:\Android\Sdk, chuyển ANDROID_HOME sang đó, và cấu hình Genymotion dùng chung bản adb của SDK này, để chỉ có một phiên bản adb chạy tại một thời điểm.">Installed a real Android SDK (platform-tools plus build-tools 34.0.0) at C:\Android\Sdk, moved ANDROID_HOME there, and pointed Genymotion at that same SDK's adb, so only one adb version runs at a time.</dd>
+            </div>
+          </dl>
+        </div>
+      </li>
+
+    </ol>
+
+    <p class="section-note t" style="margin-top: -8px;" data-en="From there, a session opened in about two seconds. FrontRow installed, launched, and rendered its real first screen: an event list with search, category filters, and one featured show." data-vi="Từ đó, một phiên làm việc mở ra chỉ trong khoảng hai giây. FrontRow được cài đặt, khởi chạy, và hiển thị đúng màn hình đầu tiên: danh sách sự kiện kèm ô tìm kiếm, các bộ lọc thể loại, và một sự kiện nổi bật.">From there, a session opened in about two seconds. FrontRow installed, launched, and rendered its real first screen: an event list with search, category filters, and one featured show.</p>
+  </section>
+
+  <section>
+    <h2 class="t" data-en="Fix reference" data-vi="Bảng tham chiếu các bản sửa">Fix reference</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="t" data-en="Issue" data-vi="Vấn đề">Issue</th>
+            <th class="t" data-en="Changed in" data-vi="Sửa tại">Changed in</th>
+            <th class="t" data-en="Change" data-vi="Nội dung thay đổi">Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="t" data-en="gmtool license desync" data-vi="Xung đột giấy phép gmtool">gmtool license desync</td>
+            <td class="file t" data-en="(Genymotion GUI)" data-vi="(Giao diện Genymotion)">(Genymotion GUI)</td>
+            <td class="t" data-en="Device created outside gmtool" data-vi="Tạo thiết bị bên ngoài gmtool">Device created outside gmtool</td>
+          </tr>
+          <tr>
+            <td class="t" data-en="Appium start timeout" data-vi="Hết thời gian chờ Appium khởi động">Appium start timeout</td>
+            <td class="file">config/wdio.conf.ts</td>
+            <td class="mono">appiumStartTimeout: 90000</td>
+          </tr>
+          <tr>
+            <td class="t" data-en="localhost resolves to IPv6" data-vi="localhost phân giải sang IPv6">localhost resolves to IPv6</td>
+            <td class="file">.env</td>
+            <td class="mono">APPIUM_HOST=127.0.0.1</td>
+          </tr>
+          <tr>
+            <td class="t" data-en="ANDROID_HOME missing" data-vi="Thiếu ANDROID_HOME">ANDROID_HOME missing</td>
+            <td class="file">.env</td>
+            <td class="mono">ANDROID_HOME=C:\Android\Sdk</td>
+          </tr>
+          <tr>
+            <td class="t" data-en="Missing build-tools" data-vi="Thiếu build-tools">Missing build-tools</td>
+            <td class="file">.env, config/wdio.android.conf.ts</td>
+            <td class="t" data-en="SDK installed; ANDROID_APP_PACKAGE / ANDROID_APP_ACTIVITY added" data-vi="Đã cài SDK; thêm ANDROID_APP_PACKAGE / ANDROID_APP_ACTIVITY">SDK installed; ANDROID_APP_PACKAGE / ANDROID_APP_ACTIVITY added</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="t" data-en="The real device: what's actually on screen" data-vi="Thiết bị thật: những gì thực sự hiển thị trên màn hình">The real device: what's actually on screen</h2>
+    <p class="section-note t" data-en="tests/specs/smoke/login.spec.ts looks for an element with accessibility id login-button. FrontRow doesn't have a login screen. It opens straight into an event list." data-vi="tests/specs/smoke/login.spec.ts tìm một phần tử có accessibility id là login-button. FrontRow không có màn hình đăng nhập. Ứng dụng mở thẳng vào danh sách sự kiện.">tests/specs/smoke/login.spec.ts looks for an element with accessibility id login-button. FrontRow doesn't have a login screen. It opens straight into an event list.</p>
+
+    <div class="device-wrap">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-status"><span>9:50</span><span>100%</span></div>
+          <div class="phone-body">
+            <p class="phone-h1">Events</p>
+            <div class="phone-search t" data-en="Search shows, artists, cities…" data-vi="Tìm show, nghệ sĩ, thành phố…">Search shows, artists, cities…</div>
+            <div class="phone-pills">
+              <span class="phone-pill active t" data-en="All" data-vi="Tất cả">All</span>
+              <span class="phone-pill t" data-en="Indie Rock" data-vi="Indie Rock">Indie Rock</span>
+              <span class="phone-pill t" data-en="Classical" data-vi="Cổ điển">Classical</span>
+              <span class="phone-pill t" data-en="Electronic" data-vi="Electronic">Electronic</span>
+            </div>
+            <div class="phone-card">
+              <div class="phone-card-art"><span class="phone-card-badge t" data-en="Featured" data-vi="Nổi bật">Featured</span></div>
+              <div class="phone-card-body">
+                <p class="phone-card-title">Zenith Tour, Tokyo</p>
+                <p class="phone-card-sub">Sora Aoyama</p>
+                <div class="phone-card-row">
+                  <span class="phone-card-meta">Tokyo Dome · Tue, Sep 22</span>
+                  <span class="phone-card-price">¥950,000<small class="t" data-en="from" data-vi="từ">from</small></span>
+                </div>
+              </div>
+            </div>
+            <p class="phone-end t" data-en="2 events shown · end of list" data-vi="Đã hiển thị 2 sự kiện · hết danh sách">2 events shown · end of list</p>
+            <div class="phone-nav">
+              <div class="active"><div class="dot"></div><span class="t" data-en="Events" data-vi="Sự kiện">Events</span></div>
+              <div><div class="dot"></div><span class="t" data-en="My Tickets" data-vi="Vé của tôi">My Tickets</span></div>
+              <div><div class="dot"></div><span class="t" data-en="Profile" data-vi="Hồ sơ">Profile</span></div>
+              <div><div class="dot"></div><span>Debug</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="device-note">
+          <span class="mono" style="color:var(--bad); font-weight:700;">login-button</span>
+          <span class="t" data-en=" appears nowhere on this screen, or anywhere else in the app. The test failure is correct; the Page Object is pointed at the wrong app." data-vi=" không xuất hiện ở bất kỳ đâu trên màn hình này, cũng như trong toàn bộ ứng dụng. Việc kiểm thử thất bại là đúng; Page Object đang trỏ sai ứng dụng."> appears nowhere on this screen, or anywhere else in the app. The test failure is correct; the Page Object is pointed at the wrong app.</span>
+        </div>
+        <div class="device-note">
+          <span class="t" data-en="A smaller, separate bug: the failure hook tries to save a screenshot to reports/screenshots, a folder that doesn't exist yet, so that step fails too, on top of the real failure." data-vi="Một lỗi nhỏ khác, không liên quan: hook chụp ảnh màn hình khi test thất bại cố lưu vào reports/screenshots, một thư mục chưa tồn tại, nên bước đó cũng lỗi theo, chồng lên lỗi thật sự.">A smaller, separate bug: the failure hook tries to save a screenshot to reports/screenshots, a folder that doesn't exist yet, so that step fails too, on top of the real failure.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="next">
+    <h2 class="t" data-en="What's next" data-vi="Bước tiếp theo">What's next</h2>
+    <p class="t" data-en="Write a Page Object for FrontRow's actual first screen (search, filters, event list) and a spec that exercises it, so there's a test that can pass, not just one confirmed to fail." data-vi="Viết một Page Object cho đúng màn hình đầu tiên của FrontRow (tìm kiếm, bộ lọc, danh sách sự kiện) cùng một spec thao tác trên đó, để có một bài test có thể pass, chứ không chỉ một bài đã được xác nhận là fail.">Write a Page Object for FrontRow's actual first screen (search, filters, event list) and a spec that exercises it, so there's a test that can pass, not just one confirmed to fail.</p>
+  </section>
+
+  <footer>
+    <span class="t" data-en="webdriverio-mobile-typescript · recap generated from session logs, Aug 9, 2026" data-vi="webdriverio-mobile-typescript · tổng kết được tạo từ log của phiên làm việc, 09/08/2026">webdriverio-mobile-typescript · recap generated from session logs, Aug 9, 2026</span>
+  </footer>
+
+</div>
+
+<script>
+  function setLang(lang) {
+    document.documentElement.setAttribute('lang', lang);
+    document.querySelectorAll('.t').forEach(function (el) {
+      var text = el.getAttribute('data-' + lang);
+      if (text !== null) el.textContent = text;
+    });
+    document.getElementById('btn-en').setAttribute('aria-pressed', String(lang === 'en'));
+    document.getElementById('btn-vi').setAttribute('aria-pressed', String(lang === 'vi'));
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FrontRow: Smoke &amp; end-to-end test catalog</title>
+<style>
+  :root {
+    /* Light: warm ticket-stock ground, stage-crimson accent */
+    --paper: #f4f2ee;
+    --paper-raised: #ffffff;
+    --paper-sunk: #efece5;
+    --ink: #211c1a;
+    --ink-soft: #5b5149;
+    --ink-faint: #8a7f74;
+    --line: #e3dcd0;
+    --line-strong: #d2c8b8;
+    --accent: #c81d54;
+    --accent-ink: #a01643;
+    --accent-soft: #fbe7ee;
+    --gold: #9d6f23;
+    --gold-soft: #f6ecd7;
+
+    --ok: #2f7d5b;
+    --ok-soft: #e5f1ea;
+    --warn: #9a6410;
+    --warn-soft: #f6ecd8;
+    --crit: #b23a2c;
+    --crit-soft: #f7e5e1;
+    --neutral: #6a6660;
+    --neutral-soft: #eae7e1;
+
+    --font-marquee: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+
+    --maxw: 1160px;
+    --readw: 720px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #16120f;
+      --paper-raised: #201b16;
+      --paper-sunk: #1b1611;
+      --ink: #f2ece2;
+      --ink-soft: #b7ac9d;
+      --ink-faint: #8b8073;
+      --line: #322a22;
+      --line-strong: #453b2f;
+      --accent: #ff6c92;
+      --accent-ink: #ff90ac;
+      --accent-soft: #3a1723;
+      --gold: #e0a94e;
+      --gold-soft: #33280f;
+
+      --ok: #6cc79b;
+      --ok-soft: #16281f;
+      --warn: #e0a94e;
+      --warn-soft: #2e2410;
+      --crit: #f08a7a;
+      --crit-soft: #331813;
+      --neutral: #a49c90;
+      --neutral-soft: #262019;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #16120f;
+    --paper-raised: #201b16;
+    --paper-sunk: #1b1611;
+    --ink: #f2ece2;
+    --ink-soft: #b7ac9d;
+    --ink-faint: #8b8073;
+    --line: #322a22;
+    --line-strong: #453b2f;
+    --accent: #ff6c92;
+    --accent-ink: #ff90ac;
+    --accent-soft: #3a1723;
+    --gold: #e0a94e;
+    --gold-soft: #33280f;
+
+    --ok: #6cc79b;
+    --ok-soft: #16281f;
+    --warn: #e0a94e;
+    --warn-soft: #2e2410;
+    --crit: #f08a7a;
+    --crit-soft: #331813;
+    --neutral: #a49c90;
+    --neutral-soft: #262019;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+
+  a { color: var(--accent-ink); }
+
+  /* ---- top bar ---- */
+  .topbar {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 20px 24px 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .theme-toggle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent-ink); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- masthead ---- */
+  header.masthead {
+    padding: 28px 0 40px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 44px;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line-strong);
+  }
+  h1 {
+    font-family: var(--font-marquee);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+  h1 .amp { color: var(--accent); font-style: italic; }
+  .lede {
+    font-size: 1.12rem;
+    color: var(--ink-soft);
+    max-width: var(--readw);
+    margin: 0;
+  }
+
+  /* ---- fact strip ---- */
+  .facts {
+    margin-top: 34px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .fact {
+    background: var(--paper-raised);
+    padding: 14px 16px;
+  }
+  .fact dt {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 5px;
+  }
+  .fact dd {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  /* ---- sections ---- */
+  section { margin-top: 60px; }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .sec-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  h2 {
+    font-family: var(--font-marquee);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.5vw, 2rem);
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .prose { max-width: var(--readw); }
+  .prose p { margin: 0 0 16px; }
+
+  /* ---- screen map cards ---- */
+  .screens {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .screen {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .screen h3 {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .screen h3 code {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+  .screen p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .ids {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+  }
+  code.id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--paper-sunk);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-radius: 5px;
+    padding: 2px 6px;
+    white-space: nowrap;
+  }
+  .screen[data-gate="auth"] { border-left: 3px solid var(--accent); }
+
+  /* ---- findings callouts ---- */
+  .findings { display: grid; gap: 14px; }
+  .finding {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--neutral);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .finding.bug { border-left-color: var(--crit); }
+  .finding.mismatch { border-left-color: var(--warn); }
+  .finding.note { border-left-color: var(--accent); }
+  .finding-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .finding h3 {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    margin: 0;
+  }
+  .finding p { margin: 0; font-size: 0.93rem; color: var(--ink-soft); }
+  .finding p + p { margin-top: 8px; }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag.bug { background: var(--crit-soft); color: var(--crit); }
+  .tag.mismatch { background: var(--warn-soft); color: var(--warn); }
+  .tag.note { background: var(--accent-soft); color: var(--accent-ink); }
+
+  /* ---- tables ---- */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper-raised);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 900px;
+    font-size: 0.88rem;
+  }
+  thead th {
+    text-align: left;
+    vertical-align: bottom;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: var(--paper-sunk);
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line-strong);
+    position: sticky;
+    top: 0;
+  }
+  tbody td {
+    padding: 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--paper-sunk); }
+
+  .tc-id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-ink);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .tc-name { font-weight: 600; line-height: 1.4; }
+  td.col-steps ol {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  td.col-steps li { padding-left: 2px; }
+  .col-id { width: 15%; min-width: 130px; }
+  .col-scenario { width: 20%; }
+  .col-pre { width: 16%; }
+  .col-steps { width: 30%; }
+  .col-exp { width: 19%; }
+
+  code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+  td code { background: var(--paper-sunk); border-radius: 4px; padding: 1px 4px; }
+
+  /* ---- status pills ---- */
+  .pill {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.crit { background: var(--crit-soft); color: var(--crit); }
+  .pill.neutral { background: var(--neutral-soft); color: var(--neutral); }
+
+  /* ---- gaps list ---- */
+  .gaps {
+    columns: 2;
+    column-gap: 40px;
+    max-width: 860px;
+    padding-left: 20px;
+    margin: 0;
+  }
+  .gaps li { margin-bottom: 8px; break-inside: avoid; color: var(--ink-soft); }
+  @media (max-width: 620px) { .gaps { columns: 1; } }
+
+  /* ---- legend ---- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-top: 16px;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  /* ---- footer ---- */
+  footer {
+    margin-top: 72px;
+    padding-top: 24px;
+    border-top: 2px solid var(--ink);
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    max-width: var(--readw);
+  }
+  footer code { color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch color theme">theme: auto</button>
+  </div>
+
+  <div class="wrap">
+    <header class="masthead">
+      <p class="eyebrow">FrontRow · QA test reference</p>
+      <h1>Smoke <span class="amp">&amp;</span> end-to-end test catalog</h1>
+      <p class="lede">
+        Test cases for the FrontRow app, written from a live walkthrough of the running build
+        rather than from the repo's existing specs. Every row below traces back to something
+        seen on the device through appium-mcp.
+      </p>
+
+      <dl class="facts">
+        <div class="fact"><dt>Package</dt><dd class="mono">app.frontrow.qa</dd></div>
+        <div class="fact"><dt>Launch activity</dt><dd class="mono">.MainActivity</dd></div>
+        <div class="fact"><dt>Stack</dt><dd>Expo / React Native · SDK 54</dd></div>
+        <div class="fact"><dt>Build</dt><dd>0.0.1 · env production</dd></div>
+        <div class="fact"><dt>Device</dt><dd>Genymotion, Android 13 (API 33)</dd></div>
+        <div class="fact"><dt>Captured</dt><dd>9 Aug 2026 · UiAutomator2</dd></div>
+      </dl>
+    </header>
+
+    <section id="about">
+      <div class="sec-head"><span class="sec-num">01</span><h2>What the app is, and why this was captured live</h2></div>
+      <div class="prose">
+        <p>
+          FrontRow is a live-events ticketing app. It opens on a list of concerts, lets you filter
+          by genre and search by show, artist, or city, then buy a ticket for an event. Buying a
+          ticket needs a signed-in account; browsing does not.
+        </p>
+        <p>
+          This catalog was built by driving the installed build directly, because the repo's
+          checked-in <code>LoginPage</code>, <code>HomePage</code>, and their specs model a
+          different, fictional shopping app. Reading them would have produced test cases for
+          screens that do not exist in FrontRow. The screen names, element ids, prices, and status
+          values below are the real ones, read off the live element tree.
+        </p>
+      </div>
+    </section>
+
+    <section id="screens">
+      <div class="sec-head"><span class="sec-num">02</span><h2>Screen map</h2></div>
+      <div class="prose">
+        <p>
+          Eleven screens came up during the walkthrough. The ids shown are the ones that held up:
+          on Android, an element's <code>content-desc</code> maps to Appium's
+          <code>accessibility id</code> strategy, and that strategy resolved cleanly on every
+          screen. Cards with a crimson edge are gated behind sign-in.
+        </p>
+      </div>
+      <div class="screens">
+        <div class="screen"><h3>Events (home)<code>screen.events</code></h3>
+          <p>Landing screen. Search, sort, genre filter chips, a featured hero card, and the event list.</p>
+          <div class="ids"><code class="id">events.searchInput</code><code class="id">events.sortButton</code><code class="id">events.filterChip.*</code><code class="id">events.list</code><code class="id">events.endOfList</code></div>
+        </div>
+        <div class="screen"><h3>Event detail<code>screen.eventDetail</code></h3>
+          <p>Title, artist, date, venue, a buy button priced per event, and a reviews entry point.</p>
+          <div class="ids"><code class="id">eventDetail.title</code><code class="id">eventDetail.buyButton</code><code class="id">eventDetail.reviewsButton</code><code class="id">eventDetail.shareButton</code></div>
+        </div>
+        <div class="screen" data-gate="auth"><h3>Buy ticket<code>screen.buyTicket</code></h3>
+          <p>Quantity stepper, promo code field, subtotal and total. Confirming needs a signed-in account.</p>
+          <div class="ids"><code class="id">buyTicket.quantityStepper</code><code class="id">buyTicket.promoInput</code><code class="id">buyTicket.totalAmount</code><code class="id">buyTicket.payButton</code></div>
+        </div>
+        <div class="screen"><h3>Login<code>screen.login</code></h3>
+          <p>Reached from Profile, not on launch. Email and password fields arrive pre-filled with the demo account.</p>
+          <div class="ids"><code class="id">login.emailInput</code><code class="id">login.passwordInput</code><code class="id">login.submitButton</code><code class="id">login.forgotPasswordLink</code></div>
+        </div>
+        <div class="screen"><h3>Profile<code>screen.profile</code></h3>
+          <p>Signed out: a sign-in prompt. Signed in: name, email, and account actions.</p>
+          <div class="ids"><code class="id">profile.signInButton</code><code class="id">profile.editButton</code><code class="id">profile.settingsButton</code><code class="id">profile.signOutButton</code></div>
+        </div>
+        <div class="screen"><h3>Settings<code>Profile · Settings</code></h3>
+          <p>Push notifications, language, appearance (System / Light / Dark), payment methods, and about links.</p>
+          <div class="ids"><code class="id">Push notifications</code><code class="id">Appearance: Dark</code><code class="id">Payment methods</code></div>
+        </div>
+        <div class="screen" data-gate="auth"><h3>My tickets<code>screen.myTickets</code></h3>
+          <p>Filter chips (All / Active / Past) and a ticket list. Each active row hides a swipe-to-cancel action.</p>
+          <div class="ids"><code class="id">myTickets.filterChip.*</code><code class="id">myTickets.item.*</code><code class="id">myTickets.swipeCancel.*</code></div>
+        </div>
+        <div class="screen" data-gate="auth"><h3>Ticket detail<code>screen.ticketDetail</code></h3>
+          <p>QR code and payload, status pill, tier, quantity, total, purchase time, and a transfer action.</p>
+          <div class="ids"><code class="id">ticketDetail.qrCode</code><code class="id">ticketDetail.qrPayload</code><code class="id">ticketDetail.statusPill</code><code class="id">ticketDetail.transferButton</code></div>
+        </div>
+        <div class="screen"><h3>Reviews<code>Event detail · Reviews</code></h3>
+          <p>Star rating, a 280-character review field, photo attach, and a post button. Empty state invites the first review.</p>
+          <div class="ids"><code class="id">1 to 5 stars</code><code class="id">Review text</code><code class="id">Post review</code></div>
+        </div>
+        <div class="screen"><h3>Debug<code>tab.debug</code></h3>
+          <p>A QA-only menu: build info, jump-to-screen shortcuts, and Haptics / Location / Biometric testers.</p>
+          <div class="ids"><code class="id">Jump to screen</code><code class="id">Haptics</code><code class="id">Location</code><code class="id">Biometric</code></div>
+        </div>
+        <div class="screen"><h3>Sign-in-required dialog<code>native alert</code></h3>
+          <p>Fires when an unauthenticated user confirms a purchase. Native Android alert with a single OK button.</p>
+          <div class="ids"><code class="id">android:id/alert_title</code><code class="id">android:id/button1</code></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="findings">
+      <div class="sec-head"><span class="sec-num">03</span><h2>Findings worth acting on</h2></div>
+      <div class="findings">
+        <div class="finding bug">
+          <div class="finding-top"><span class="tag bug">likely bug</span><h3>The promo discount never reaches the ticket record</h3></div>
+          <p>Applying <code>FRONTROW10</code> takes the Buy Ticket total from ¥950000 down to ¥855000 and shows a discount line. The ticket saved to My Tickets and Ticket Detail records the full ¥950000. The discount looks display-only. This deserves a bug ticket and a standing assertion in the purchase test.</p>
+        </div>
+        <div class="finding mismatch">
+          <div class="finding-top"><span class="tag mismatch">framework mismatch</span><h3>Sign-in lives behind Profile, not on launch</h3></div>
+          <p>The app opens on Events with no login gate. Sign-in exists only at Profile, then Sign in. The repo's <code>LoginPage</code> and <code>login.spec.ts</code> assume login is the first screen, so they cannot pass against this build. New page objects for the real screens are the prerequisite for any of the cases below.</p>
+        </div>
+        <div class="finding note">
+          <div class="finding-top"><span class="tag note">automation note</span><h3>Cancelling a ticket needs a real swipe, not a tap on the hidden id</h3></div>
+          <p>The Cancel control sits under the ticket row and only appears after swiping the row left. Tapping the row opens Ticket Detail instead. Automation that taps <code>myTickets.swipeCancel.*</code> without swiping first lands on the wrong screen.</p>
+        </div>
+        <div class="finding note">
+          <div class="finding-top"><span class="tag note">behavior</span><h3>Cancel produces "refund pending", not removal</h3></div>
+          <p>Confirming a cancel moves the ticket from <span class="pill ok">active</span> to <span class="pill warn">refund pending</span> and keeps it in the list. Tests should assert the status change rather than the ticket disappearing.</p>
+        </div>
+        <div class="finding note">
+          <div class="finding-top"><span class="tag note">correction</span><h3>The filter chips are All, Indie Rock, Classical, Electronic, Folk</h3></div>
+          <p>There is no Featured chip. "Featured" is only a badge on one event card. An earlier field note recorded this wrong. There is also a fourth bottom tab, Debug, that was not previously documented.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="smoke">
+      <div class="sec-head"><span class="sec-num">04</span><h2>Smoke test suite</h2></div>
+      <div class="prose">
+        <p>Shallow, fast checks. One critical path per surface, enough to tell whether the build is worth deeper testing.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">Test case</th>
+              <th class="col-scenario">Scenario</th>
+              <th class="col-pre">Precondition</th>
+              <th class="col-steps">Steps</th>
+              <th class="col-exp">Expected result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-01</span><span class="tc-name">App launches to Events</span></td>
+              <td>App opens on the correct home screen</td>
+              <td>App installed, emulator running</td>
+              <td class="col-steps"><ol><li>Launch FrontRow</li></ol></td>
+              <td>Events screen renders with search bar, five filter chips, and the event list within the default timeout</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-02</span><span class="tc-name">Bottom nav shows all tabs</span></td>
+              <td>Primary navigation is present</td>
+              <td>App launched</td>
+              <td class="col-steps"><ol><li>Inspect the bottom tab bar</li></ol></td>
+              <td>Events, My Tickets, Profile, and Debug tabs are all present and tappable</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-03</span><span class="tc-name">Search returns a match</span></td>
+              <td>Search filters the event list</td>
+              <td>On Events screen</td>
+              <td class="col-steps"><ol><li>Tap the search field</li><li>Enter <code>Tokyo</code></li></ol></td>
+              <td>List narrows to only "Zenith Tour — Tokyo Night One"; the other event drops out</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-04</span><span class="tc-name">Empty search state</span></td>
+              <td>No-match search shows a clear message</td>
+              <td>On Events screen</td>
+              <td class="col-steps"><ol><li>Enter a nonsense term, for example <code>zzzznoresults</code></li></ol></td>
+              <td>"No events found" with "Try a different search term or clear the filters above." The list is empty</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-05</span><span class="tc-name">Genre chip filters</span></td>
+              <td>A filter chip scopes the list</td>
+              <td>On Events, search cleared</td>
+              <td class="col-steps"><ol><li>Tap the <code>Folk</code> chip</li></ol></td>
+              <td>List updates to Folk-tagged events only. With the current seed that is zero, so the empty state shows</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-06</span><span class="tc-name">Event detail opens</span></td>
+              <td>A list item opens its detail screen</td>
+              <td>On Events screen</td>
+              <td class="col-steps"><ol><li>Tap an event card</li></ol></td>
+              <td>Event Detail opens with title, artist, date, venue, a buy button, and a reviews button</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-07</span><span class="tc-name">Purchase blocked when signed out</span></td>
+              <td>The auth gate holds on checkout</td>
+              <td>Signed out, on Event Detail</td>
+              <td class="col-steps"><ol><li>Tap the buy button</li><li>Tap "Confirm purchase"</li></ol></td>
+              <td>A "Sign in required" alert appears reading "Please sign in to purchase tickets." No ticket is created</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-08</span><span class="tc-name">Sign in via Profile</span></td>
+              <td>Demo login succeeds</td>
+              <td>Signed out</td>
+              <td class="col-steps"><ol><li>Open Profile</li><li>Tap "Sign in"</li><li>Submit the pre-filled form (<code>demo@frontrow.app</code> / <code>demo1234</code>)</li></ol></td>
+              <td>Profile shows "Demo User" and account actions (Edit profile, Following, Premium, Settings, Sign out)</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-09</span><span class="tc-name">Purchase succeeds when signed in</span></td>
+              <td>Checkout completes for an authenticated user</td>
+              <td>Signed in, on Buy Ticket</td>
+              <td class="col-steps"><ol><li>Tap "Confirm purchase"</li></ol></td>
+              <td>Purchase completes with no error dialog, returns to Event Detail, and a new <span class="pill ok">active</span> ticket appears in My Tickets</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-10</span><span class="tc-name">My Tickets loads</span></td>
+              <td>Ticket list renders</td>
+              <td>Signed in, at least one ticket</td>
+              <td class="col-steps"><ol><li>Open My Tickets</li></ol></td>
+              <td>Ticket rows show tier, purchase date, quantity, price, and status. Filter chips All / Active / Past are present</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-11</span><span class="tc-name">Profile loads (signed out)</span></td>
+              <td>Signed-out profile renders</td>
+              <td>Fresh, unauthenticated session</td>
+              <td class="col-steps"><ol><li>Open Profile</li></ol></td>
+              <td>"Sign in" heading, the "manage your account and tickets" subtitle, and a Sign in button render</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">SMK-12</span><span class="tc-name">Debug menu loads</span></td>
+              <td>QA menu renders</td>
+              <td>App launched</td>
+              <td class="col-steps"><ol><li>Open the Debug tab</li></ol></td>
+              <td>"QA Debug Menu" shows build info (app, version, platform, Expo SDK, env) and jump-to-screen shortcuts</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="e2e">
+      <div class="sec-head"><span class="sec-num">05</span><h2>End-to-end test suite</h2></div>
+      <div class="prose">
+        <p>Multi-screen journeys that chain real user actions. The first case is the spine: it strings browsing, the auth gate, sign-in, and checkout into one flow and ends on the discount discrepancy.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">Test case</th>
+              <th class="col-scenario">Scenario</th>
+              <th class="col-pre">Precondition</th>
+              <th class="col-steps">Steps</th>
+              <th class="col-exp">Expected result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-01</span><span class="tc-name">Full purchase journey with promo and auth gate</span></td>
+              <td>Browse, filter, search, buy, sign in mid-flow, verify the ticket</td>
+              <td>Signed out, app freshly launched</td>
+              <td class="col-steps"><ol>
+                <li>Land on Events</li>
+                <li>Tap <code>All</code>, confirm two events</li>
+                <li>Search <code>Tokyo</code>, confirm one result</li>
+                <li>Open the event card</li>
+                <li>Tap "Buy · ¥950000"</li>
+                <li>Enter <code>FRONTROW10</code>, tap Apply, confirm total ¥855000</li>
+                <li>Tap "Confirm purchase", get the sign-in alert, tap OK</li>
+                <li>Profile, Sign in, submit the demo form</li>
+                <li>Return to the Events tab; the Buy Ticket screen is restored from that tab's own stack, promo intact</li>
+                <li>Tap "Confirm purchase" again</li>
+                <li>Open My Tickets</li>
+              </ol></td>
+              <td>The ticket appears <span class="pill ok">active</span>, quantity 1. Check the recorded total: ¥855000 is correct, ¥950000 is the current defect (see finding one)</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-02</span><span class="tc-name">View ticket QR and detail</span></td>
+              <td>A ticket opens its detail and QR</td>
+              <td>Signed in, owns an active ticket (from E2E-01)</td>
+              <td class="col-steps"><ol><li>Open My Tickets</li><li>Tap the ticket row, not the swipe area</li></ol></td>
+              <td>Ticket Detail shows a QR image, the payload string (<code>FR-{ticket}-{event}-{qty}</code>), status <span class="pill ok">active</span>, tier, quantity, total, purchase time, and a Transfer action</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-03</span><span class="tc-name">Cancel an active ticket</span></td>
+              <td>Cancel moves a ticket to refund pending</td>
+              <td>Signed in, owns an active ticket</td>
+              <td class="col-steps"><ol><li>Swipe the ticket row left to reveal Cancel</li><li>Tap "Cancel"</li></ol></td>
+              <td>Status changes from <span class="pill ok">active</span> to <span class="pill warn">refund pending</span>. The ticket stays in the list; reopening Ticket Detail shows the same status</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-04</span><span class="tc-name">Ticket filter chips scope by state</span></td>
+              <td>All / Active / Past bucket tickets correctly</td>
+              <td>Signed in, owns tickets in several states</td>
+              <td class="col-steps"><ol><li>Tap <code>All</code>, note the full count</li><li>Tap <code>Active</code></li><li>Tap <code>Past</code></li></ol></td>
+              <td>Active shows only <span class="pill ok">active</span> tickets; Past shows only <span class="pill neutral">used</span> tickets; refund-pending sits outside both. Confirm which bucket, if any, surfaces it</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-05</span><span class="tc-name">Auth-gated detail features appear after sign-in</span></td>
+              <td>Personalization on Event Detail is gated</td>
+              <td>Signed out initially</td>
+              <td class="col-steps"><ol><li>Open an event's detail signed out; note only Share, Buy, Reviews</li><li>Sign in via Profile</li><li>Return to the same event's detail</li></ol></td>
+              <td>"Add to favorites" and "Follow artist" now appear, both absent while signed out</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-06</span><span class="tc-name">Leave a review</span></td>
+              <td>Posting a review adds it to the list</td>
+              <td>Signed in, on an event's Reviews screen (empty)</td>
+              <td class="col-steps"><ol><li>Tap a star rating, for example four stars</li><li>Enter text in "What stood out?"</li><li>Tap "Post review"</li></ol></td>
+              <td>The review joins the list and the "No reviews yet" empty state clears. Rating and text persist when the screen is reopened</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-07</span><span class="tc-name">Sign out clears the session</span></td>
+              <td>Sign-out returns the app to the gated state</td>
+              <td>Signed in, on Profile</td>
+              <td class="col-steps"><ol><li>Tap "Sign out"</li><li>Open any event, Buy, then Confirm purchase</li></ol></td>
+              <td>Profile reverts to the signed-out prompt, and checkout shows the "Sign in required" alert again, so no stale token remains</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-08</span><span class="tc-name">Settings changes hold</span></td>
+              <td>Preferences apply without crashing or logging out</td>
+              <td>Signed in, on Settings</td>
+              <td class="col-steps"><ol><li>Toggle Push notifications</li><li>Switch Appearance to Dark, then back to System</li><li>Go back to Profile, reopen Settings</li></ol></td>
+              <td>No crash. The toggle and appearance control keep their last state on reopen, and the session stays signed in</td>
+            </tr>
+            <tr>
+              <td class="col-id"><span class="tc-id">E2E-09</span><span class="tc-name">Debug jump-to-screen shortcuts</span></td>
+              <td>Direct-navigation shortcuts reach each screen</td>
+              <td>App launched, Debug tab open</td>
+              <td class="col-steps"><ol><li>Tap each shortcut in turn: Events, My Tickets, Profile, Sign in</li></ol></td>
+              <td>Each shortcut opens its target screen directly, a fast path for reachability checks that skips normal tab navigation</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <span><span class="pill ok">active</span> current, usable ticket</span>
+        <span><span class="pill neutral">used</span> past ticket</span>
+        <span><span class="pill warn">refund pending</span> cancelled, awaiting refund</span>
+        <span><span class="pill crit">blocked</span> action refused by a gate</span>
+      </div>
+    </section>
+
+    <section id="gaps">
+      <div class="sec-head"><span class="sec-num">06</span><h2>Seen but not yet driven</h2></div>
+      <div class="prose">
+        <p>These screens and actions showed up during the walkthrough but were not exercised end to end. They extend the flows above rather than opening new critical paths, and are the obvious next places to deepen coverage.</p>
+      </div>
+      <ul class="gaps">
+        <li>Edit profile</li>
+        <li>Following list</li>
+        <li>Premium upsell</li>
+        <li>Payment methods</li>
+        <li>Attach a photo to a review</li>
+        <li>Transfer a ticket</li>
+        <li>Quantity stepper above one</li>
+        <li>Invalid or expired promo code</li>
+        <li>Remove an applied promo</li>
+        <li>Sort events</li>
+        <li>Biometric, Location, and Haptics testers in Debug</li>
+        <li>Forgot password link</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>
+        Captured live on 9 Aug 2026 against <code>app.frontrow.qa</code> through the appium-mcp
+        session on the Genymotion device. Event and ticket data reflect the demo seed plus one
+        ticket bought during the walkthrough (<code>tkt_101</code>), which was then cancelled to
+        refund pending. FrontRow is a QA training app from
+        <a href="https://github.com/majdukovic/frontrow">github.com/majdukovic/frontrow</a>.
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var order = ["auto", "light", "dark"];
+      var btn = document.getElementById("themeToggle");
+      var root = document.documentElement;
+      var saved = null;
+      try { saved = localStorage.getItem("frontrow-theme"); } catch (e) {}
+      var state = order.indexOf(saved) > -1 ? saved : "auto";
+
+      function apply() {
+        if (state === "auto") { root.removeAttribute("data-theme"); }
+        else { root.setAttribute("data-theme", state); }
+        btn.textContent = "theme: " + state;
+        try { localStorage.setItem("frontrow-theme", state); } catch (e) {}
+      }
+
+      btn.addEventListener("click", function () {
+        state = order[(order.indexOf(state) + 1) % order.length];
+        apply();
+      });
+
+      apply();
+    })();
+  </script>
+</body>
+</html>

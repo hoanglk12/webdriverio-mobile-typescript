@@ -72,6 +72,12 @@ export const config: WebdriverIO.Config = {
           relaxedSecurity: true,
           allowInsecure: ['chromedriver_autodownload'],
         },
+        // Default is 30s. On this machine loading both the uiautomator2 and
+        // xcuitest drivers (Appium loads every installed driver at boot,
+        // regardless of platform under test) can take 30-45s on cold start —
+        // observed via `appium` run directly: ~14s + ~31s sequentially.
+        // Bump generously so a slow/first-run boot doesn't race the default.
+        appiumStartTimeout: 90000,
         logPath: './reports/logs/',
       },
     ],

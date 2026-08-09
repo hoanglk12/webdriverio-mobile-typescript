@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Installing appium-mcp the way that actually connects</title>
+<style>
+  :root {
+    --paper: #F1F3F5;
+    --ink: #12161C;
+    --muted: #5B6472;
+    --accent: #2C6E82;
+    --accent-soft: #DCE9EC;
+    --ok: #2F8F5B;
+    --ok-soft: #DFF1E6;
+    --fail: #C1502E;
+    --fail-soft: #F7E3DA;
+    --line: rgba(18, 22, 28, 0.13);
+    --code-bg: #0B0E11;
+    --code-fg: #D8DEE4;
+    --code-muted: #6F7B88;
+    --code-ok: #58C29A;
+    --code-fail: #E2795A;
+    --font-sans: "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Cascadia Mono", "Consolas", "SF Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0D1013;
+      --ink: #E8EAED;
+      --muted: #98A2AE;
+      --accent: #6FC1D6;
+      --accent-soft: #133038;
+      --ok: #4CC38A;
+      --ok-soft: #123023;
+      --fail: #E2795A;
+      --fail-soft: #331A12;
+      --line: rgba(232, 234, 237, 0.14);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0D1013;
+    --ink: #E8EAED;
+    --muted: #98A2AE;
+    --accent: #6FC1D6;
+    --accent-soft: #133038;
+    --ok: #4CC38A;
+    --ok-soft: #123023;
+    --fail: #E2795A;
+    --fail-soft: #331A12;
+    --line: rgba(232, 234, 237, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  #langToggle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.4rem 0.7rem;
+    cursor: pointer;
+  }
+  #langToggle:hover { border-color: var(--accent); color: var(--accent); }
+  #langToggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.6rem;
+  }
+
+  h1 {
+    font-size: clamp(1.7rem, 4vw, 2.15rem);
+    line-height: 1.2;
+    margin: 0 0 0.75rem;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .dek {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 42ch;
+    margin: 0 0 1.4rem;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 0.4rem; }
+  .chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45em;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+  }
+  .chip.fail { background: var(--fail-soft); color: var(--fail); border-color: color-mix(in srgb, var(--fail) 35%, var(--line)); }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
+  .chip .lbl { color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+
+  .provenance {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 1.4rem 0 0;
+  }
+
+  main { margin-top: 2.6rem; }
+
+  section { margin: 2.6rem 0; }
+  section h2 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.6rem;
+    margin: 0 0 1rem;
+  }
+  section h2 b { color: var(--ink); font-weight: 700; }
+
+  h3 { font-size: 1.05rem; margin: 1.4rem 0 0.5rem; }
+
+  p { margin: 0.7rem 0; }
+
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  ol.steps > li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 1.5rem 2.4rem;
+    border-left: 1px solid var(--line);
+    margin-left: 0.6rem;
+  }
+  ol.steps > li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  ol.steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: -0.6rem;
+    top: 0;
+    width: 1.2rem;
+    height: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 50%;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    transform: translateX(-50%);
+  }
+  ol.steps > li > strong { display: block; margin-bottom: 0.35rem; }
+
+  pre {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: 5px;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    margin: 0.6rem 0 1rem;
+  }
+  pre .c1 { color: var(--code-muted); }
+  pre .ok { color: var(--code-ok); }
+  pre .fail { color: var(--code-fail); }
+  code.inline {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+  }
+
+  .diff { position: relative; }
+  .diff .tag {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--code-muted);
+  }
+  .diff pre .rm { color: var(--code-fail); }
+  .diff pre .rm::before { content: "− "; }
+  .diff pre .add { color: var(--code-ok); }
+  .diff pre .add::before { content: "+ "; }
+
+  .chart { margin: 1.2rem 0 0.4rem; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1.1rem 0; }
+  .row { display: grid; grid-template-columns: 15ch 1fr 8ch; align-items: center; gap: 0.75rem; margin: 0.55rem 0; }
+  .row .label { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+  .row .track { position: relative; height: 10px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .row .fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; font-variant-numeric: tabular-nums; }
+  .row .fill.ok { background: var(--ok); }
+  .row .fill.fail {
+    background: repeating-linear-gradient(115deg, var(--fail) 0 8px, color-mix(in srgb, var(--fail) 55%, transparent) 8px 16px);
+  }
+  .row .value { font-family: var(--font-mono); font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; }
+  .row .value.ok { color: var(--ok); }
+  .row .value.fail { color: var(--fail); }
+  .chart-note { font-size: 12.5px; color: var(--muted); margin-top: 0.7rem; }
+
+  ul.check { margin: 0.6rem 0; padding: 0; list-style: none; }
+  ul.check > li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin: 0.55rem 0;
+  }
+  ul.check > li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  footer {
+    margin-top: 3.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  /* Baseline for the instant before JS runs. JS immediately sets an explicit
+     inline display on every .en/.vi element (see applyLang below) and that
+     always wins from then on, so this only matters pre-hydration / no-JS. */
+  .vi { display: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .row .fill { transition: width 0.5s ease; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <button id="langToggle" type="button" aria-live="polite">VN 🇻🇳 · switch language</button>
+</div>
+
+<div class="wrap">
+  <p class="eyebrow en">MCP connection postmortem</p>
+  <p class="eyebrow vi">Báo cáo sự cố kết nối MCP</p>
+
+  <h1 class="en">Installing appium&#8209;mcp the way that actually connects</h1>
+  <h1 class="vi">Cài appium&#8209;mcp theo cách thực sự kết nối được</h1>
+
+  <p class="dek en">The <code class="inline">npx appium-mcp@latest</code> entry in <code class="inline">.mcp.json</code> looked correct and still timed out. Here's what was actually happening, and the config that replaced it.</p>
+  <p class="dek vi">Dòng cấu hình <code class="inline">npx appium-mcp@latest</code> trong <code class="inline">.mcp.json</code> nhìn có vẻ đúng nhưng vẫn hết thời gian chờ. Đây là nguyên nhân thật, và cấu hình đã thay thế nó.</p>
+
+  <div class="chips">
+    <span class="chip fail"><span class="lbl en">before</span><span class="lbl vi">trước</span> · timed out @ 30000ms ✕</span>
+    <span class="chip ok"><span class="lbl en">after</span><span class="lbl vi">sau</span> · reconnected ✓</span>
+  </div>
+  <p class="provenance en">First seen 2026-08-09, 00:13 SEAST · root-caused &amp; fixed 2026-08-09, 18:28 to 18:42 SEAST</p>
+  <p class="provenance vi">Phát hiện lần đầu 09/08/2026, 00:13 SEAST · tìm ra nguyên nhân &amp; sửa xong 09/08/2026, 18:28 đến 18:42 SEAST</p>
+
+  <main>
+
+    <section>
+      <h2 class="en">[fix] <b>Install it this way</b></h2>
+      <h2 class="vi">[fix] <b>Cài theo cách này</b></h2>
+
+      <ol class="steps">
+        <li>
+          <strong class="en">Install the server globally instead of launching it through <code class="inline">npx</code>.</strong>
+          <strong class="vi">Cài server này ở phạm vi toàn cục, không chạy qua <code class="inline">npx</code>.</strong>
+          <pre>npm install -g appium-mcp@1.92.0</pre>
+        </li>
+        <li>
+          <strong class="en">Confirm where the binary landed.</strong>
+          <strong class="vi">Kiểm tra xem file thực thi nằm ở đâu.</strong>
+          <pre>where appium-mcp
+<span class="c1">C:\nvm4w\nodejs\appium-mcp
+C:\nvm4w\nodejs\appium-mcp.cmd</span></pre>
+          <p class="en">Your path will differ depending on which Node install owns your global npm prefix. Whatever <code class="inline">where appium-mcp</code> reports is the binary <code class="inline">.mcp.json</code> needs to point at.</p>
+          <p class="vi">Đường dẫn của bạn có thể khác, tùy vào bản Node nào đang giữ npm prefix toàn cục. Cứ dùng đúng kết quả mà <code class="inline">where appium-mcp</code> trả về để điền vào <code class="inline">.mcp.json</code>.</p>
+        </li>
+        <li>
+          <strong class="en">Point <code class="inline">.mcp.json</code> at that binary directly.</strong>
+          <strong class="vi">Chỉnh <code class="inline">.mcp.json</code> để gọi trực tiếp file thực thi đó.</strong>
+          <div class="diff">
+            <span class="tag">.mcp.json</span>
+            <pre>{
+  "mcpServers": {
+    "appium-mcp": {
+      "type": "stdio",
+<span class="rm">      "command": "npx",</span>
+<span class="rm">      "args": ["-y", "appium-mcp@latest"],</span>
+<span class="add">      "command": "appium-mcp.cmd",</span>
+<span class="add">      "args": [],</span>
+      "env": {}
+    }
+  }
+}</pre>
+          </div>
+        </li>
+        <li>
+          <strong class="en">Reconnect.</strong>
+          <strong class="vi">Kết nối lại.</strong>
+          <pre><span class="c1">&gt; </span>/mcp
+<span class="ok">Reconnected to appium-mcp.</span></pre>
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2 class="en">[why] <b>What the old config was actually waiting on</b></h2>
+      <h2 class="vi">[why] <b>Cấu hình cũ thật ra đang chờ cái gì</b></h2>
+
+      <p class="en">The failure read as a broken package or a bad config. It was neither: <code class="inline">npm view appium-mcp version</code> resolved fine, and the tarball was already sitting in the npm cache. Running the exact command from <code class="inline">.mcp.json</code> by hand even started clean and answered a real MCP <code class="inline">initialize</code> handshake correctly. So the package was never the problem.</p>
+      <p class="vi">Lỗi trông như gói hỏng hoặc cấu hình sai, nhưng không phải cả hai: <code class="inline">npm view appium-mcp version</code> vẫn phân giải được, và file tarball đã có sẵn trong cache của npm. Chạy đúng lệnh trong <code class="inline">.mcp.json</code> bằng tay còn khởi động sạch sẽ và trả lời đúng cho một cuộc bắt tay <code class="inline">initialize</code> thật của MCP. Vậy gói không hề là vấn đề.</p>
+
+      <p class="en">The gap was <code class="inline">npx</code> itself. It caches its resolution by the exact spec string, not by package name: <code class="inline">appium-mcp@latest</code> and <code class="inline">appium-mcp@1.92.0</code> are two separate cache entries, even though they're the same code. The first time either spec runs, <code class="inline">npx</code> makes a registry round trip to resolve it before the process starts, and a stdio MCP server hasn't spawned yet while that's happening. That round trip is what a client's connect timeout is racing against.</p>
+      <p class="vi">Điểm nghẽn là <code class="inline">npx</code> chính nó. Nó lưu cache theo đúng chuỗi spec, không theo tên gói: <code class="inline">appium-mcp@latest</code> và <code class="inline">appium-mcp@1.92.0</code> là hai mục cache khác nhau, dù cùng một mã nguồn. Lần đầu chạy một spec bất kỳ, <code class="inline">npx</code> phải gọi ra registry để phân giải trước khi tiến trình khởi động, và một MCP server dạng stdio thì chưa hề được sinh ra trong lúc đó. Chính khoảng chờ đó là thứ đang đua với thời gian chờ kết nối của client.</p>
+
+      <p class="en">To check, this session forced a cold spec on purpose: <code class="inline">npx appium-mcp@1.92.0</code>, a version string it had never resolved before. That hung twice in a row, killed at 20s, then again at 30s. The exact same package via <code class="inline">appium-mcp@latest</code>, already resolved earlier in the session, started in 3 seconds. Same code, same machine, same network: the only variable was whether npx had resolved that spec before.</p>
+      <p class="vi">Để kiểm tra, session này cố tình ép một spec "lạnh": <code class="inline">npx appium-mcp@1.92.0</code>, một chuỗi phiên bản chưa từng được phân giải trước đó. Nó treo hai lần liên tiếp, dừng ở 20 giây, rồi lại 30 giây. Cùng gói đó gọi qua <code class="inline">appium-mcp@latest</code>, vốn đã được phân giải từ trước trong session, khởi động trong 3 giây. Cùng mã nguồn, cùng máy, cùng mạng: biến số duy nhất là npx đã từng phân giải spec đó hay chưa.</p>
+
+      <div class="chart">
+        <div class="row">
+          <span class="label en">npx @latest (warm)</span>
+          <span class="label vi">npx @latest (đã phân giải)</span>
+          <span class="track"><span class="fill ok" style="width: 10%"></span></span>
+          <span class="value ok">3s</span>
+        </div>
+        <div class="row">
+          <span class="label en">npx @1.92.0, run 1</span>
+          <span class="label vi">npx @1.92.0, lần 1</span>
+          <span class="track"><span class="fill fail" style="width: 66%"></span></span>
+          <span class="value fail">&gt;20s</span>
+        </div>
+        <div class="row">
+          <span class="label en">npx @1.92.0, run 2</span>
+          <span class="label vi">npx @1.92.0, lần 2</span>
+          <span class="track"><span class="fill fail" style="width: 100%"></span></span>
+          <span class="value fail">&gt;30s</span>
+        </div>
+        <div class="row">
+          <span class="label en">global binary</span>
+          <span class="label vi">binary toàn cục</span>
+          <span class="track"><span class="fill ok" style="width: 4%"></span></span>
+          <span class="value ok">&lt;1s</span>
+        </div>
+        <p class="chart-note en">Striped bars didn't finish: both cold runs were still hanging when killed, so &gt;20s and &gt;30s are lower bounds, not actual durations.</p>
+        <p class="chart-note vi">Các thanh có vân sọc là chưa chạy xong: cả hai lần chạy "lạnh" vẫn đang treo lúc bị dừng, nên &gt;20 giây và &gt;30 giây là mốc tối thiểu, không phải thời gian thực tế.</p>
+      </div>
+
+      <p class="en">One more factor stacked on top: this machine starts roughly 50 concurrent <code class="inline">node.exe</code> processes at session start for every other configured MCP server. That contention doesn't cause the timeout by itself, but it shortens the margin a slow registry lookup had to work with.</p>
+      <p class="vi">Có thêm một yếu tố cộng dồn: máy này khởi động khoảng 50 tiến trình <code class="inline">node.exe</code> đồng thời khi vào session, cho tất cả các MCP server khác đã cấu hình. Sự tranh chấp đó không tự nó gây ra timeout, nhưng nó làm co lại khoảng dư mà một lượt tra cứu registry chậm cần để hoàn tất.</p>
+    </section>
+
+    <section>
+      <h2 class="en">[verify] <b>How this was confirmed, not assumed</b></h2>
+      <h2 class="vi">[verify] <b>Đã xác nhận thế nào, không chỉ đoán</b></h2>
+      <ul class="check">
+        <li class="en">Sent a real MCP <code class="inline">initialize</code> request over stdin to the running process and read back a valid JSON-RPC response (<code class="inline">serverInfo</code> named <code class="inline">MCP Appium</code>, version <code class="inline">1.92.0</code>) before touching the config.</li>
+        <li class="vi">Gửi một yêu cầu <code class="inline">initialize</code> thật của MCP qua stdin tới tiến trình đang chạy và đọc lại được phản hồi JSON-RPC hợp lệ (<code class="inline">serverInfo</code> tên <code class="inline">MCP Appium</code>, phiên bản <code class="inline">1.92.0</code>) trước khi chạm vào cấu hình.</li>
+        <li class="en">Ran the global binary standalone and diffed its startup log line-for-line against the npx version: identical, including the harmless <code class="inline">[FastMCP warning] could not infer client capabilities</code> line, which turned out to be cosmetic in both cases.</li>
+        <li class="vi">Chạy binary toàn cục một mình và so từng dòng log khởi động với bản chạy qua npx: giống hệt, kể cả dòng cảnh báo vô hại <code class="inline">[FastMCP warning] could not infer client capabilities</code>, hóa ra chỉ là hình thức ở cả hai trường hợp.</li>
+        <li class="en">Only after both of those checks passed did <code class="inline">.mcp.json</code> get edited, and <code class="inline">/mcp</code> reported <code class="inline">Reconnected to appium-mcp.</code> on the first try.</li>
+        <li class="vi">Chỉ sau khi cả hai bước trên đều ổn mới sửa <code class="inline">.mcp.json</code>, và <code class="inline">/mcp</code> báo <code class="inline">Reconnected to appium-mcp.</code> ngay lần đầu.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="en">[if it recurs] <b>Where to look next time</b></h2>
+      <h2 class="vi">[if it recurs] <b>Lần sau thì tìm ở đâu</b></h2>
+      <ul class="check">
+        <li class="en">Suspect <code class="inline">npx</code>'s cold-resolution round trip first for <em>any</em> <code class="inline">npx ...@latest</code> entry in <code class="inline">.mcp.json</code>, not just this one. The same fix (global install, direct binary path) applies to each.</li>
+        <li class="vi">Với <em>mọi</em> mục dùng <code class="inline">npx ...@latest</code> trong <code class="inline">.mcp.json</code>, không riêng gói này, nghi trước tiên là lượt phân giải "lạnh" của <code class="inline">npx</code>. Cách sửa giống nhau: cài toàn cục, chỉ thẳng vào file thực thi.</li>
+        <li class="en">A timeout error means something started but didn't finish the handshake in time. That's a different failure than a spawn error (bad path, missing binary), which surfaces immediately instead.</li>
+        <li class="vi">Lỗi timeout nghĩa là có gì đó đã bắt đầu chạy nhưng không kịp hoàn tất bắt tay. Khác với lỗi khởi tạo tiến trình (sai đường dẫn, thiếu file thực thi), loại lỗi đó hiện ra ngay lập tức.</li>
+        <li class="en">If <code class="inline">appium-mcp</code> gets reinstalled or upgraded, re-run <code class="inline">where appium-mcp</code>. The global prefix can move if the active Node version changes.</li>
+        <li class="vi">Nếu <code class="inline">appium-mcp</code> được cài lại hoặc nâng cấp, chạy lại <code class="inline">where appium-mcp</code>, vì npm prefix toàn cục có thể đổi nếu bản Node đang dùng thay đổi.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    <span class="en">Recorded from two sessions on this repo, 2026-08-09 · saved to project memory as <code class="inline">appium-mcp-connection-fix.md</code></span>
+    <span class="vi">Ghi lại từ hai session trên repo này, ngày 09/08/2026 · đã lưu vào memory của project với tên <code class="inline">appium-mcp-connection-fix.md</code></span>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('langToggle');
+    var root = document.documentElement;
+
+    // Setting style.display = '' only clears an inline override; it falls
+    // back to whatever the stylesheet says, which is still `.vi{display:none}`.
+    // So "shown" needs an explicit, correct display value per tag, not ''.
+    function shownDisplay(tag) {
+      if (tag === 'li') return 'list-item';
+      if (tag === 'span') return 'inline';
+      return 'block'; // p, h1, h2, strong
+    }
+
+    function applyLang(lang) {
+      document.querySelectorAll('.en, .vi').forEach(function (el) {
+        var active = el.classList.contains(lang);
+        el.style.display = active ? shownDisplay(el.tagName.toLowerCase()) : 'none';
+      });
+      root.setAttribute('data-lang', lang);
+      btn.textContent = lang === 'vi' ? 'EN 🇬🇧 · switch language' : 'VN 🇻🇳 · switch language';
+    }
+
+    btn.addEventListener('click', function () {
+      applyLang(root.getAttribute('data-lang') === 'vi' ? 'en' : 'vi');
+    });
+
+    applyLang('en');
+  })();
+</script>
+</body>
+</html>
