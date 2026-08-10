@@ -36,6 +36,24 @@ export const invalidUsers = [
 ];
 
 /**
+ * FrontRow app fixtures (Events / home screen).
+ *
+ * Filter chips are identified by their testID slug (Android `resource-id`,
+ * e.g. `events.filterChip.indie-rock`). Verified live against the QA build
+ * app.frontrow.qa.
+ *
+ * On a fresh, SIGNED-OUT launch (SMK-01's precondition) the row renders
+ * exactly these five chips, all on-screen — matching the test-case doc.
+ * The `favorites` chip is auth-gated: it appears only when signed in, and
+ * signing in also brings additional `j-pop` / `punk` chips into the
+ * horizontally scrollable row. None of those are present signed out.
+ */
+export const frontRow = {
+  /** Filter chips on a fresh signed-out launch, in display order (testID slugs). */
+  filterChipSlugs: ['all', 'indie-rock', 'classical', 'electronic', 'folk'],
+};
+
+/**
  * Test data for products
  */
 export const products = [
