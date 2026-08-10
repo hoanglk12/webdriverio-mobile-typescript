@@ -10,18 +10,20 @@ description: Use when investigating or modifying this repo's GitHub Actions pipe
 ```
 lint-and-typecheck (ubuntu, gate)
         │
-        ├──▶ test-android (macos, matrix: api-level [30, 31])
-        └──▶ test-ios     (macos, matrix: ios-version × device ['iPhone 14 Pro'])
+        ├──▶ test-android      (macos, matrix: api-level [30, 31])
+        ├──▶ test-ios          (macos, matrix: ios-version × device ['iPhone 14 Pro'])
+        └──▶ test-browserstack (ubuntu, if: BROWSERSTACK_* secrets are set)
                         │
                         ▼
-              publish-report (ubuntu, needs both)
+              publish-report (ubuntu, needs all three, if: always())
                         │
                         ▼
-                  notify (ubuntu, needs both, if: always())
+                  notify (ubuntu, needs all three, if: always())
 ```
 
-- `lint-and-typecheck` runs `npm ci` → `npm run lint` → `npm run type-check` → `npm run format:check`. Both platform test jobs `needs:` this — a lint/type/format failure blocks both, so check this job first on any red run.
+- `lint-and-typecheck` runs `npm ci` → `npm run lint` → `npm run type-check` → `npm run format:check`. All three platform/target jobs `needs:` this — a lint/type/format failure blocks all of them, so check this job first on any red run.
 - `workflow_dispatch` accepts `platform` (android/ios/both, default android) and `suite` inputs. The `if:` conditions on `test-android`/`test-ios` key off `github.event.inputs.platform` — on a push/PR trigger (no inputs), both platform conditions evaluate to their `== null` branch and both run.
+- `test-browserstack` has no `platform` gating of its own — it's gated only on whether `secrets.BROWSERSTACK_USERNAME`/`BROWSERSTACK_ACCESS_KEY` are configured, so it skips cleanly (not a failure) on forks or before those secrets exist. Unlike the other two jobs it runs on `ubuntu-latest`, not `macos-latest` — BrowserStack is the device and the Appium server both, so there's no local emulator/simulator to boot.
 
 ## Where to look for failure evidence
 
@@ -39,6 +41,7 @@ Download the relevant artifact from the failed run rather than re-running blind.
 3. **iOS simulator UUID lookup returning empty** — the `Boot iOS Simulator` step greps `xcrun simctl list devices available` for `matrix.device` + `matrix.ios-version`; if GitHub's macOS runner image doesn't have that exact iOS version/device pair pre-installed, the grep returns nothing, `DEVICE_UUID` is empty, and `xcrun simctl boot` fails with a confusing error. Check `xcrun simctl list devices available` output in the job log first.
 4. **`publish-report`'s `gh-pages` checkout** uses `continue-on-error: true` — a missing `gh-pages` branch (e.g. first-ever run) won't fail the job but will produce a report with no history; not a bug, just expected on a fresh repo.
 5. **Secrets required**: `secrets.GITHUB_TOKEN` (implicit, Pages deploy) and `secrets.SLACK_WEBHOOK_URL` (must be configured in repo/org settings for `notify` to actually post — if it's silently not posting, check the secret exists before checking the action logs).
+6. **`test-browserstack` re-uploads the app on every run** via `npm run browserstack:upload:android`, so a failure there (bad credentials, app path missing) shows up as an upload-step failure before the actual test step ever runs — check that step's log first, not the test step, when this job is red. It needs `secrets.BROWSERSTACK_USERNAME`/`BROWSERSTACK_ACCESS_KEY` configured in repo Settings → Secrets; until BrowserStack's open-source grant (or a trial account) is set up, this job is expected to show as skipped, not failed.
 
 ## Scope note
 

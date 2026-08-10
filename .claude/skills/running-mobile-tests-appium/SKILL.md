@@ -25,8 +25,20 @@ description: Use when the user wants to run this framework's mobile test suite l
 | Every spec regardless of suite | `npm run test:parallel` |
 | Just verify code quality, no device run | `npm run test:verify` (type-check + lint) |
 | Fuller environment sanity check | `npm run verify` (runs `verify-framework.ps1`) |
+| Run Android on BrowserStack instead of locally | `npm run test:browserstack:android` (`config/wdio.browserstack.android.conf.ts`) |
+| Run iOS on BrowserStack instead of locally | `npm run test:browserstack:ios` (`config/wdio.browserstack.ios.conf.ts`) |
 
 Platform and suite choice matter — `test:android`/`test:ios` pick the capabilities config, `test:smoke`/`test:regression` pick which spec folder(s) under `tests/specs/` run. They compose: e.g. run Android smoke tests by using `wdio run ./config/wdio.android.conf.ts --suite smoke` directly if there's no combined npm script for the exact pairing you need.
+
+## Cloud device farm (BrowserStack)
+
+For running against a real device without a local emulator/simulator (this repo's Genymotion setup, or a Mac for iOS):
+
+1. Sign up at BrowserStack and grab a username/access key from Account Settings. A private repo only gets a one-time 100-minute trial; applying at browserstack.com/open-source once the repo is public gets unlimited Live/Automate/Percy instead (5 users, 5 parallel sessions) — either way the steps below are identical, only the credentials' source changes.
+2. Set `BROWSERSTACK_USERNAME`/`BROWSERSTACK_ACCESS_KEY` in `.env`.
+3. Upload the app to get a `bs://` app ID: `npm run browserstack:upload:android` (or `:ios`), then paste the printed ID into `BROWSERSTACK_ANDROID_APP_ID`/`BROWSERSTACK_IOS_APP_ID` in `.env`. Re-run this whenever the APK/IPA changes — the app ID is tied to that specific upload, not the file path.
+4. Run `npm run test:browserstack:android` (or `:ios`, `--suite smoke`/`--suite regression` compose the same way as the local scripts). No local Appium server or emulator/simulator is needed — BrowserStack is both.
+5. iOS specifically needs a signed `.ipa` uploaded, not a Simulator-only `.app`/`.app.zip` build — BrowserStack's real devices can't run a Simulator binary. Check what's actually available under `apps/ios/` before assuming this path is ready to go.
 
 ## After a run
 

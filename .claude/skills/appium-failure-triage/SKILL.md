@@ -1,6 +1,6 @@
 ---
 name: appium-failure-triage
-description: Use when a local Appium/WebdriverIO test in this framework fails mid-run and you need to see what was actually on-device at the point of failure — e.g. "this test failed with element not found, what was on screen", "the login test timed out, check the device", "is the app even showing the right screen right now". Uses the appium-mcp MCP server to inspect the live element tree, take a screenshot, and check session/app state, then cross-references the framework's own Page Objects and logs. Not for CI infrastructure failures (see ci-release-triage) or for setting up/running the suite in the first place (see running-mobile-tests-appium).
+description: Use when an Appium/WebdriverIO test in this framework fails mid-run (local or on BrowserStack) and you need to see what was actually on-device at the point of failure — e.g. "this test failed with element not found, what was on screen", "the login test timed out, check the device", "is the app even showing the right screen right now", "check what happened on the BrowserStack run". Uses the appium-mcp MCP server to inspect the live element tree, take a screenshot, and check session/app state, then cross-references the framework's own Page Objects and logs. Not for CI infrastructure failures (see ci-release-triage) or for setting up/running the suite in the first place (see running-mobile-tests-appium).
 ---
 
 # Triaging a failing Appium test with `appium-mcp`
@@ -24,3 +24,13 @@ Requires the `appium-mcp` MCP server (registered project-scoped in `.mcp.json`, 
 ## Output
 
 State plainly which of these it was: stale/renamed selector, timing gap, wrong screen/context, or a permission/dialog blocker — and point at the specific page object getter or wait call to fix. Don't leave the root cause as "the test failed" after using these tools.
+
+## Triaging a BrowserStack cloud session instead of a local one
+
+`appium-mcp` isn't limited to embedded local sessions — it also supports attaching to any existing Appium-compatible endpoint via a `remoteServerUrl` argument on session creation, which covers a `test:browserstack:*` failure with no local emulator involved:
+
+1. Build the remote URL from `.env`'s `BROWSERSTACK_USERNAME`/`BROWSERSTACK_ACCESS_KEY`: `https://<user>:<key>@hub-cloud.browserstack.com/wd/hub`. `appium-mcp` parses `user`/`key` straight out of the URL's userinfo, so there's no separate auth step.
+2. Pass the matching `bstack:options` capabilities from `config/wdio.browserstack.android.conf.ts` or `config/wdio.browserstack.ios.conf.ts` (`deviceName`, `platformVersion`) rather than the local `wdio.android.conf.ts`/`wdio.ios.conf.ts` values — a mismatched device/OS pair against BrowserStack's real catalog fails session creation outright rather than falling back to something close.
+3. Steps 2 through 6 of the local procedure above are unchanged — element tree, screenshot, session/app state, and log cross-reference all operate on whatever session is attached, local or remote.
+
+Useful on a machine with no local Android/iOS device set up at all: attaching remotely to BrowserStack doesn't need `ANDROID_HOME`, an emulator, or a simulator.

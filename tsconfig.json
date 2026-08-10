@@ -26,6 +26,6 @@
     "types": ["node", "mocha", "chai"],
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*", "tests/**/*", "config/**/*", "utils/**/*"],
+  "include": ["src/**/*", "tests/**/*", "config/**/*", "utils/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist", "reports"]
 }
