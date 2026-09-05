@@ -51,6 +51,9 @@ export const invalidUsers = [
 export const frontRow = {
   /** Filter chips on a fresh signed-out launch, in display order (testID slugs). */
   filterChipSlugs: ['all', 'indie-rock', 'classical', 'electronic', 'folk'],
+
+  /** Bottom tab bar entries, in display order (testID slugs, `tab.<slug>`). */
+  bottomNavTabSlugs: ['events', 'myTickets', 'profile', 'debug'],
 };
 
 /**

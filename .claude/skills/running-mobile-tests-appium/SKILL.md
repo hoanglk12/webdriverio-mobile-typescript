@@ -55,3 +55,19 @@ For running against a real device without a local emulator/simulator (this repo'
 5. Appium server port conflict (`APPIUM_HOST`/`APPIUM_PORT` in `.env`) — another Appium instance already bound to 4723.
 
 If the session starts fine but a specific assertion/element fails mid-test, that's a different problem — use `appium-failure-triage` instead of re-running blindly.
+
+## Genymotion VM instability on Windows — check host RAM first
+
+If the Genymotion Android VM shows any of: SystemUI ANRs, `system_server` crashes (`dumpsys window`/`dumpsys activity` returning `Can't find service: ...` or `DEAD_OBJECT`/`Broken pipe`), or the Genymotion GUI errors with "the virtual device did not get any IP address" — **check host free RAM before touching Appium config, driver versions, or capabilities**:
+
+```powershell
+Get-CimInstance Win32_OperatingSystem | Select-Object @{N='FreeGB';E={[math]::Round($_.FreePhysicalMemory/1MB,1)}}
+```
+
+Under ~3-4GB free (common with Chrome/Claude Code/WSL running alongside an 8GB-allocated VM), the guest crashes reliably the instant UiAutomator2 session-init touches any package-manager/settings-service call. This has been mistaken for a driver bug before — it wasn't. Close other apps/tabs to free RAM rather than chasing driver versions or `appium:ignoreHiddenApiPolicyError`-style capability tweaks first.
+
+**Rebooting the guest (`adb reboot`, or `VBoxManage poweroff`+`startvm`) does not fix this** — it reproduces identically because host memory pressure is untouched by rebooting the guest. If instability recurs identically across 2+ clean reboots, stop rebooting; either free host RAM or recreate the VM from a clean snapshot (`VBoxManage snapshot "<device>" restore <snapshot-name>`, or via Genymotion Manager) — repeated hard `poweroff`s can also degrade guest disk state over a troubleshooting session, so a snapshot restore fixes both causes at once.
+
+Two related gotchas when recreating/rebooting the VM:
+- **`adb shell getprop sys.boot_completed` is unreliable (often always empty)** on Genymotion's vbox86 images — don't gate any wait on it. Poll `adb shell service list | grep -E "activity:|package:|window:"` instead; full boot means all three are registered.
+- **A recreated/restarted VM can get a different DHCP-assigned IP** than before (e.g. `.101` → `.102`). Always confirm the live IP via `adb devices -l` (after `adb connect <ip>:5555`) rather than assuming a previously-known IP still applies.

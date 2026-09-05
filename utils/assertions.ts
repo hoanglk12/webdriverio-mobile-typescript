@@ -121,7 +121,14 @@ export class Assertions {
    * @param message - Custom error message
    */
   static async assertClickable(element: WebdriverIO.Element, message?: string): Promise<void> {
-    const isClickable = await element.isClickable();
+    // element.isClickable() throws "Method not supported in mobile native
+    // environment" for native app context, so clickability is checked via
+    // each platform's native accessibility attribute instead.
+    const platform = driver.capabilities.platformName?.toLowerCase();
+    const isClickable =
+      platform === 'ios'
+        ? await element.isEnabled()
+        : (await element.getAttribute('clickable')) === 'true';
     const selector = await element.selector;
     const errorMessage = message || `Element ${selector} is not clickable`;
 

@@ -37,7 +37,13 @@ export abstract class BasePage {
   ): Promise<void> {
     try {
       const el = element as WebdriverIO.Element;
-      await el.waitForClickable({ timeout });
+      // el.waitForClickable() throws "only available for desktop and mobile
+      // browsers" in native app context, so clickability is polled via the
+      // same native-attribute check as isClickable() instead.
+      await browser.waitUntil(async () => this.isClickable(el), {
+        timeout,
+        timeoutMsg: `Element still not clickable after ${timeout}ms`,
+      });
       logger.debug(`Element clickable`);
     } catch (error) {
       logger.error(`Element not clickable`);
@@ -166,6 +172,30 @@ export abstract class BasePage {
       return await el.isDisplayed();
     } catch {
       logger.debug(`Element not displayed`);
+      return false;
+    }
+  }
+
+  /**
+   * Check if element is clickable
+   * @param element - WebdriverIO element
+   * @returns True if clickable
+   */
+  protected async isClickable(element: ElementType): Promise<boolean> {
+    try {
+      const el = element as WebdriverIO.Element;
+      if (!(await this.isDisplayed(el))) {
+        return false;
+      }
+      // WebdriverIO's own el.isClickable() throws "Method not supported in
+      // mobile native environment" for native app context, so clickability
+      // is checked via each platform's native accessibility attribute instead.
+      return await this.executePlatformSpecific(
+        async () => (await el.getAttribute('clickable')) === 'true',
+        async () => await el.isEnabled()
+      );
+    } catch {
+      logger.debug(`Element not clickable`);
       return false;
     }
   }
