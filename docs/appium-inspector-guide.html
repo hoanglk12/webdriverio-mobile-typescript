@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appium Inspector guide</title>
+<style>
+  :root {
+    --bg: #F1F3F6;
+    --surface: #FFFFFF;
+    --surface-2: #F7F8FA;
+    --ink: #12161C;
+    --ink-muted: #576273;
+    --line: #DEE3EA;
+    --accent: #0E7C86;
+    --accent-strong: #0B646D;
+    --accent-bg: rgba(14, 124, 134, 0.08);
+    --good: #1F8A5F;
+    --good-bg: rgba(31, 138, 95, 0.09);
+    --bad: #B8461F;
+    --bad-bg: rgba(184, 70, 31, 0.09);
+    --shadow: 0 1px 2px rgba(18, 22, 28, 0.04), 0 8px 24px -12px rgba(18, 22, 28, 0.12);
+    --font-sans: "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, "Roboto Mono", "Noto Sans Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11151B; --surface: #181D24; --surface-2: #1E2430;
+      --ink: #E7ECF2; --ink-muted: #97A2B3; --line: #2A313D;
+      --accent: #4FD1DB; --accent-strong: #8CE6ED;
+      --accent-bg: rgba(79, 209, 219, 0.10);
+      --good: #4ECB93; --good-bg: rgba(78, 203, 147, 0.12);
+      --bad: #E28A62; --bad-bg: rgba(226, 138, 98, 0.13);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11151B; --surface: #181D24; --surface-2: #1E2430;
+    --ink: #E7ECF2; --ink-muted: #97A2B3; --line: #2A313D;
+    --accent: #4FD1DB; --accent-strong: #8CE6ED;
+    --accent-bg: rgba(79, 209, 219, 0.10);
+    --good: #4ECB93; --good-bg: rgba(78, 203, 147, 0.12);
+    --bad: #E28A62; --bad-bg: rgba(226, 138, 98, 0.13);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-strong); }
+  code, .mono { font-family: var(--font-mono); }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 24px 96px; }
+
+  .masthead { padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent-strong); margin: 0 0 10px;
+  }
+  h1 { font-size: clamp(26px, 4vw, 32px); line-height: 1.25; font-weight: 700; margin: 0 0 12px; }
+  .subtitle { color: var(--ink-muted); font-size: 16.5px; max-width: 78ch; margin: 0 0 14px; }
+  .meta { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-muted); }
+  .col-heads {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    margin-top: 22px; font-family: var(--font-mono); font-size: 11.5px;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted);
+  }
+
+  section { margin-top: 48px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 0 0 18px; }
+
+  .bi { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+  .bi > .en, .bi > .vi { min-width: 0; }
+  .bi > .vi { border-left: 1px solid var(--line); padding-left: 28px; }
+  .bi p { margin: 0 0 12px; }
+  .bi p:last-child { margin-bottom: 0; }
+  @media (max-width: 720px) {
+    .bi { grid-template-columns: 1fr; }
+    .bi > .vi { border-left: none; padding-left: 0; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
+    .col-heads { display: none; }
+  }
+
+  .shared { margin: 18px 0; }
+  pre {
+    margin: 0; background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 12px 14px; overflow-x: auto;
+    font-size: 13px; line-height: 1.55;
+  }
+  pre code { color: var(--accent-strong); }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 520px; }
+  thead th {
+    text-align: left; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--ink-muted); background: var(--surface-2);
+    padding: 10px 13px; border-bottom: 1px solid var(--line);
+  }
+  tbody td { padding: 11px 13px; border-bottom: 1px solid var(--line); vertical-align: top; background: var(--surface); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.mono, th.mono { font-family: var(--font-mono); font-size: 12.5px; }
+  td.strategy { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent-strong); white-space: nowrap; }
+
+  .verdict { display: inline-block; font-family: var(--font-mono); font-size: 11px; padding: 2px 8px; border-radius: 100px; white-space: nowrap; }
+  .verdict.use { background: var(--good-bg); color: var(--good); }
+  .verdict.avoid { background: var(--bad-bg); color: var(--bad); }
+
+  .callout {
+    background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--bad);
+    border-radius: 0 10px 10px 0; padding: 14px 16px; font-size: 14.5px; margin: 16px 0 0;
+  }
+  .callout code { color: var(--bad); }
+
+  .file-list { list-style: none; margin: 0; padding: 0; font-family: var(--font-mono); font-size: 13px; }
+  .file-list li { padding: 4px 0; color: var(--accent-strong); }
+  .file-list li span { color: var(--ink-muted); font-family: var(--font-sans); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Field notes / Appium Inspector</p>
+    <h1>Installing Appium Inspector, capturing locators, and running gestures against FrontRow</h1>
+    <p class="subtitle">What had to be fixed before Inspector would even open, the capability and locator choices that came out of using it against this app, and the gesture files it produced. English and Vietnamese side by side.</p>
+    <p class="meta">webdriverio-mobile-typescript &middot; docs/appium-inspector-guide.html</p>
+    <div class="col-heads"><div>English</div><div>Tiếng Việt</div></div>
+  </header>
+
+  <section>
+    <h2>What this covers / Nội dung tài liệu này</h2>
+    <div class="bi">
+      <div class="en">
+        <p>Appium Inspector is the GUI for looking at a live Appium session: a screenshot of the device next to the element tree, so locators and gestures can be tried out before any test code gets written. This page covers installing it on Windows, connecting it to this repo's local Appium server, the locator strategies that actually hold up against FrontRow, and the gesture files already sitting in <code>docs/gestures/</code>.</p>
+      </div>
+      <div class="vi">
+        <p>Appium Inspector là công cụ giao diện đồ họa để xem một phiên Appium đang chạy: ảnh chụp màn hình thiết bị đặt cạnh cây phần tử, giúp thử locator và cử chỉ (gesture) trước khi viết bất kỳ đoạn test nào. Tài liệu này trình bày cách cài đặt trên Windows, kết nối với Appium server chạy cục bộ của repo này, các chiến lược locator thực sự đáng tin cậy với FrontRow, và các file gesture đã có sẵn trong <code>docs/gestures/</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Installing it / Cài đặt</h2>
+    <div class="bi">
+      <div class="en">
+        <p>Don't run <code>npx appium-inspector</code>. It looks like the fastest way to try it once without installing anything, and it downloads without complaint, but it fails at launch with <code>'electron' is not recognized as an internal or external command</code>. The npm package published as <code>appium-inspector</code> is a mirror of the project's source tree, not a packaged CLI. Its own <code>package.json</code> does define a <code>bin</code> entry, but it points at <code>./node_modules/.bin/electron</code>, and electron only appears in <code>devDependencies</code>, which npx never installs. That path never gets created, so the command npx tries to run doesn't exist.</p>
+        <p>Appium Inspector actually ships as a desktop build, from the GitHub releases of <code>appium/appium-inspector</code>. The <code>win-x64.zip</code> build is portable: no installer, no admin rights, just unzip and run <code>Appium Inspector.exe</code>.</p>
+      </div>
+      <div class="vi">
+        <p>Đừng chạy <code>npx appium-inspector</code>. Nhìn thì có vẻ là cách nhanh nhất để thử mà không cần cài gì cả, và lệnh này tải về không báo lỗi gì, nhưng khi khởi chạy sẽ báo <code>'electron' is not recognized as an internal or external command</code>. Gói npm mang tên <code>appium-inspector</code> thực chất là bản sao mã nguồn của dự án, không phải một CLI đóng gói. <code>package.json</code> của nó có khai báo trường <code>bin</code>, nhưng trỏ tới <code>./node_modules/.bin/electron</code>, trong khi electron chỉ nằm trong <code>devDependencies</code>, mà npx không bao giờ cài. Đường dẫn đó không bao giờ được tạo ra, nên lệnh mà npx cố chạy không tồn tại.</p>
+        <p>Appium Inspector thực ra được phát hành dưới dạng bản build desktop, lấy từ GitHub releases của <code>appium/appium-inspector</code>. Bản <code>win-x64.zip</code> là bản portable: không cần trình cài đặt, không cần quyền admin, chỉ cần giải nén và chạy <code>Appium Inspector.exe</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Starting a session / Bắt đầu một phiên</h2>
+    <div class="bi">
+      <div class="en">
+        <p>Point Inspector at a standalone Appium server, not at the <code>appium-mcp</code> MCP server this repo already runs on port 4723. Start one on a separate port:</p>
+      </div>
+      <div class="vi">
+        <p>Trỏ Inspector tới một Appium server độc lập, không phải tới <code>appium-mcp</code> MCP server mà repo này đang chạy ở cổng 4723. Khởi động một server riêng ở cổng khác:</p>
+      </div>
+    </div>
+    <div class="shared">
+      <pre><code>ANDROID_HOME=C:/Android/Sdk npx --no-install appium --address 127.0.0.1 --port 4725 --relaxed-security</code></pre>
+    </div>
+    <div class="bi">
+      <div class="en">
+        <p>In the session builder: Remote Host <code>127.0.0.1</code>, Remote Port <code>4725</code>, Remote Path <code>/</code>. Pin <code>appium:udid</code> to the device's current adb address rather than relying on <code>deviceName</code>, since the Genymotion VM's IP has changed before (it moved from <code>.101</code> to <code>.102</code> across a VM recreation). The row based capability builder also asks for a type per row (text, boolean, number, or JSON object): everything below is text except <code>noReset</code> and <code>forceAppLaunch</code>, which are boolean.</p>
+      </div>
+      <div class="vi">
+        <p>Trong màn hình tạo phiên: Remote Host là <code>127.0.0.1</code>, Remote Port là <code>4725</code>, Remote Path là <code>/</code>. Gắn <code>appium:udid</code> theo địa chỉ adb hiện tại của thiết bị thay vì phụ thuộc vào <code>deviceName</code>, vì IP của máy ảo Genymotion từng thay đổi (từ <code>.101</code> sang <code>.102</code> sau khi tạo lại máy ảo). Bộ tạo capability theo từng dòng cũng hỏi kiểu dữ liệu cho mỗi dòng (text, boolean, number, hoặc JSON object): tất cả các dòng dưới đây đều là text, trừ <code>noReset</code> và <code>forceAppLaunch</code> là boolean.</p>
+      </div>
+    </div>
+    <div class="shared table-scroll">
+      <table>
+        <thead><tr><th>Capability</th><th class="mono">Type</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">platformName</td><td class="mono">text</td><td class="mono">Android</td></tr>
+          <tr><td class="mono">appium:automationName</td><td class="mono">text</td><td class="mono">UiAutomator2</td></tr>
+          <tr><td class="mono">appium:udid</td><td class="mono">text</td><td class="mono">192.168.56.102:5555</td></tr>
+          <tr><td class="mono">appium:appPackage</td><td class="mono">text</td><td class="mono">app.frontrow.qa</td></tr>
+          <tr><td class="mono">appium:appActivity</td><td class="mono">text</td><td class="mono">.MainActivity</td></tr>
+          <tr><td class="mono">appium:noReset</td><td class="mono">boolean</td><td class="mono">true</td></tr>
+          <tr><td class="mono">appium:forceAppLaunch</td><td class="mono">boolean</td><td class="mono">true</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <div class="bi" style="grid-template-columns: 1fr 1fr;">
+        <div class="en"><strong>Mistake:</strong> the first session opened straight to the device's home screen instead of FrontRow, even with <code>appPackage</code> and <code>appActivity</code> set correctly. The Appium server log had the answer: <code>'app.frontrow.qa' is already running and noReset is enabled</code>. A previous session had left the app running in the background, and <code>noReset</code> skips relaunching an app it already sees running. Adding <code>appium:forceAppLaunch</code> fixed it: Appium force stopped the stale process and started the app fresh.</div>
+        <div class="vi"><strong>Sai lầm gặp phải:</strong> phiên đầu tiên mở thẳng vào màn hình chính của thiết bị thay vì FrontRow, dù <code>appPackage</code> và <code>appActivity</code> đã khai báo đúng. Log của Appium server cho câu trả lời: <code>'app.frontrow.qa' is already running and noReset is enabled</code>. Một phiên trước đó đã để ứng dụng chạy ngầm, và <code>noReset</code> bỏ qua việc khởi chạy lại một ứng dụng mà nó thấy đang chạy. Thêm <code>appium:forceAppLaunch</code> đã xử lý được: Appium buộc dừng tiến trình cũ và khởi chạy lại ứng dụng từ đầu.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Native mode, not Web/Hybrid / Native mode, không phải Web/Hybrid</h2>
+    <div class="bi">
+      <div class="en">
+        <p>Leave the mode toggle at the top on Native App Mode (the tree icon, selected by default), not Web/Hybrid App Mode (the globe icon). The Source panel already answers the question: it lists <code>android.widget.FrameLayout</code> and <code>android.widget.LinearLayout</code> nodes, plain native Android views, not a WebView with DOM nodes. React Native compiles down to native widgets unless a screen embeds an actual <code>&lt;WebView&gt;</code> component.</p>
+      </div>
+      <div class="vi">
+        <p>Giữ nút chuyển chế độ ở trên cùng ở Native App Mode (biểu tượng cây, được chọn mặc định), không chuyển sang Web/Hybrid App Mode (biểu tượng quả địa cầu). Panel Source đã trả lời sẵn câu hỏi này: nó liệt kê các node <code>android.widget.FrameLayout</code> và <code>android.widget.LinearLayout</code>, là các view Android gốc thông thường, không phải WebView với node DOM. React Native biên dịch xuống thành widget gốc trừ khi một màn hình nhúng một component <code>&lt;WebView&gt;</code> thực sự.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Which locator to pick / Chọn locator nào</h2>
+    <div class="bi">
+      <div class="en">
+        <p>Inspector shows four options for almost every element: accessibility id, id, an android uiautomator selector, and xpath. For this app, only one of them is reliably safe.</p>
+      </div>
+      <div class="vi">
+        <p>Inspector hiển thị bốn lựa chọn cho gần như mọi phần tử: accessibility id, id, một selector android uiautomator, và xpath. Với ứng dụng này, chỉ có một lựa chọn thực sự đáng tin cậy.</p>
+      </div>
+    </div>
+    <div class="shared table-scroll">
+      <table>
+        <thead><tr><th>Strategy</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td class="strategy">android=new UiSelector().resourceId(...)</td><td><span class="verdict use">use this</span></td></tr>
+          <tr><td class="strategy">id (resource-id)</td><td><span class="verdict avoid">avoid</span></td></tr>
+          <tr><td class="strategy">accessibility id (content-desc)</td><td><span class="verdict avoid">avoid on dynamic elements</span></td></tr>
+          <tr><td class="strategy">xpath</td><td><span class="verdict avoid">last resort only</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="bi" style="margin-top:16px;">
+      <div class="en">
+        <p><code>android=new UiSelector().resourceId(...)</code> is the one to use. It maps to the React Native <code>testID</code>, doesn't care about display text or language, and is already the pattern used in <code>EventsPage.ts</code>. The plain <code>id</code> strategy shows the same resource id string, but on this app it doesn't resolve: Appium's <code>id</code> strategy expects an Android resource id in <code>package:id/name</code> form, and these RN generated ids carry no package prefix. Accessibility id is usually the safer default in this framework, but on a dynamic element like an event card it resolves to <code>content-desc</code>, which here is the full display string (something like "Zenith Tour, Tokyo Night One at Tokyo Dome"), so it changes with the data and breaks under localization. Xpath is the fallback when nothing else is available: slowest to evaluate, and the first thing to break when the view tree shifts.</p>
+      </div>
+      <div class="vi">
+        <p><code>android=new UiSelector().resourceId(...)</code> là lựa chọn nên dùng. Nó ánh xạ trực tiếp tới <code>testID</code> của React Native, không phụ thuộc vào chữ hiển thị hay ngôn ngữ, và cũng là mẫu đang được dùng trong <code>EventsPage.ts</code>. Chiến lược <code>id</code> hiển thị cùng chuỗi resource id đó, nhưng trên ứng dụng này nó không phân giải được: chiến lược <code>id</code> của Appium yêu cầu resource id ở dạng <code>package:id/name</code>, trong khi các id do RN sinh ra không có tiền tố package. Accessibility id thường là lựa chọn an toàn hơn trong framework này, nhưng với một phần tử động như thẻ sự kiện, nó phân giải thành <code>content-desc</code>, ở đây là toàn bộ chuỗi hiển thị (kiểu như "Zenith Tour, Tokyo Night One at Tokyo Dome"), nên sẽ thay đổi theo dữ liệu và gãy khi đổi ngôn ngữ. Xpath là phương án cuối khi không còn lựa chọn nào khác: chậm nhất khi Appium tính toán, và cũng là thứ đầu tiên gãy khi cây view thay đổi cấu trúc.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Running gestures from Inspector / Chạy cử chỉ (gesture) từ Inspector</h2>
+    <div class="bi">
+      <div class="en">
+        <p>Inspector has two ways to trigger a gesture. The Gestures tab builds a W3C action chain visually (pointer moves, downs, ups, pauses), which is exactly what <code>utils/gestureHelper.ts</code> sends through <code>driver.performActions()</code>. The Commands tab's Execute Methods list has <code>mobile: swipeGesture</code>, <code>mobile: scrollGesture</code>, and similar UiAutomator2 plugin shortcuts, useful for a quick check but not the same mechanism the helper uses.</p>
+        <p>The gesture files in <code>docs/gestures/</code> were built from the eight methods in <code>GestureHelper</code> and validated against Inspector's own parser (<code>gesturefile-parsing.js</code> in the appium-inspector source) before being handed over, so they import without errors. Coordinates in the file format are percentages of screen size, which is what the helper already uses, except for the two pinch files: those convert a pixel offset from the original code against this session's device resolution (1080 by 2340), so they would need recalculating for a different screen. Import them from the Gestures tab, Import from File; the tool accepts several files at once, one gesture per file.</p>
+        <p><code>doubleTap()</code> and <code>scrollToElement()</code> in the helper don't reduce to a single static gesture. <code>doubleTap</code> is two separate WebDriver clicks, approximated here as one chain with two down and up cycles. <code>scrollToElement</code> is a retry loop calling <code>swipeVertical</code> between visibility checks, which has no equivalent in a fixed action chain.</p>
+      </div>
+      <div class="vi">
+        <p>Inspector có hai cách để chạy một cử chỉ. Tab Gestures dựng một chuỗi hành động theo chuẩn W3C bằng giao diện trực quan (di chuyển con trỏ, nhấn xuống, nhấc lên, tạm dừng), đúng bằng cơ chế mà <code>utils/gestureHelper.ts</code> gửi qua <code>driver.performActions()</code>. Danh sách Execute Methods trong tab Commands có <code>mobile: swipeGesture</code>, <code>mobile: scrollGesture</code> và các lệnh tắt tương tự của plugin UiAutomator2, hữu ích để kiểm tra nhanh nhưng không cùng cơ chế với helper đang dùng.</p>
+        <p>Các file gesture trong <code>docs/gestures/</code> được xây dựng từ tám phương thức trong <code>GestureHelper</code> và đã được kiểm tra bằng chính bộ phân tích của Inspector (<code>gesturefile-parsing.js</code> trong mã nguồn appium-inspector) trước khi bàn giao, nên import vào sẽ không lỗi. Tọa độ trong định dạng file này là phần trăm theo kích thước màn hình, giống với cách helper đang dùng, ngoại trừ hai file pinch: hai file đó quy đổi độ lệch pixel trong code gốc theo độ phân giải thiết bị của phiên này (1080 x 2340), nên cần tính lại nếu dùng trên màn hình khác. Import từ tab Gestures, chọn Import from File; công cụ cho phép chọn nhiều file cùng lúc, mỗi file là một gesture.</p>
+        <p><code>doubleTap()</code> và <code>scrollToElement()</code> trong helper không thể rút gọn thành một cử chỉ tĩnh duy nhất. <code>doubleTap</code> thực chất là hai lệnh click riêng biệt của WebDriver, ở đây được mô phỏng gần đúng bằng một chuỗi gồm hai lần nhấn xuống và nhấc lên. <code>scrollToElement</code> là một vòng lặp thử lại, gọi <code>swipeVertical</code> xen giữa các lần kiểm tra hiển thị, không có gì tương đương trong một chuỗi hành động cố định.</p>
+      </div>
+    </div>
+    <div class="shared">
+      <ul class="file-list">
+        <li>docs/gestures/01-swipe-vertical-down.json <span>swipeVertical(80, 20, 1000)</span></li>
+        <li>docs/gestures/02-swipe-vertical-up.json <span>swipeVertical(20, 80, 1000)</span></li>
+        <li>docs/gestures/03-swipe-horizontal-default.json <span>swipeHorizontal(80, 20, 1000)</span></li>
+        <li>docs/gestures/04-long-press.json <span>longPress(element, 2000)</span></li>
+        <li>docs/gestures/05-tap-at-coordinates.json <span>tapAtCoordinates(x, y)</span></li>
+        <li>docs/gestures/06-double-tap.json <span>doubleTap(element), approximated</span></li>
+        <li>docs/gestures/07-pinch-out-zoom-out.json <span>pinchOut()</span></li>
+        <li>docs/gestures/08-pinch-in-zoom-in.json <span>pinchIn()</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mistakes, quick reference / Các sai lầm, tra cứu nhanh</h2>
+    <div class="bi">
+      <div class="en">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+            <tbody>
+              <tr><td><code>npx appium-inspector</code> fails with "electron not recognized"</td><td>Use the portable <code>win-x64.zip</code> build from GitHub releases; the npm package has no runnable CLI.</td></tr>
+              <tr><td>Session opens to the home screen, not FrontRow</td><td>Add <code>appium:forceAppLaunch: true</code>; <code>noReset</code> skips relaunching an app already running in the background.</td></tr>
+              <tr><td><code>id</code> locator returns not found</td><td>Use <code>android uiautomator resourceId(...)</code> instead; this app's ids have no <code>package:id/</code> prefix.</td></tr>
+              <tr><td>A locator built from an event card's accessibility id breaks on other events</td><td>Use the resource id, not <code>content-desc</code>; here <code>content-desc</code> is display text, not a stable identifier.</td></tr>
+              <tr><td><code>git clone</code> of the appium-inspector source failed on Windows</td><td>File paths under <code>app/common/renderer/components/...</code> exceeded the Windows limit; re-run with <code>git -c core.longpaths=true restore --source=HEAD :/</code> after the failed clone.</td></tr>
+              <tr><td><code>GET /sessions</code> on the local Appium server returns "unknown command"</td><td>Expected: that route is JSONWP only and isn't part of the W3C surface this Appium build exposes. Check the Session Information tab in Inspector instead.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="vi">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Vấn đề</th><th>Cách xử lý</th></tr></thead>
+            <tbody>
+              <tr><td><code>npx appium-inspector</code> báo lỗi "electron not recognized"</td><td>Dùng bản portable <code>win-x64.zip</code> từ GitHub releases; gói npm không có CLI chạy được.</td></tr>
+              <tr><td>Session mở thẳng vào màn hình chính, không phải FrontRow</td><td>Thêm <code>appium:forceAppLaunch: true</code>; <code>noReset</code> bỏ qua việc khởi chạy lại ứng dụng đang chạy ngầm.</td></tr>
+              <tr><td>Locator kiểu <code>id</code> báo not found</td><td>Dùng <code>android uiautomator resourceId(...)</code> thay thế; id trên ứng dụng này không có tiền tố <code>package:id/</code>.</td></tr>
+              <tr><td>Locator dựng từ accessibility id của một thẻ sự kiện gãy khi đổi sang sự kiện khác</td><td>Dùng resource id, không dùng <code>content-desc</code>; ở đây <code>content-desc</code> là chữ hiển thị, không phải định danh ổn định.</td></tr>
+              <tr><td><code>git clone</code> mã nguồn appium-inspector lỗi trên Windows</td><td>Đường dẫn file trong <code>app/common/renderer/components/...</code> vượt giới hạn của Windows; chạy lại bằng <code>git -c core.longpaths=true restore --source=HEAD :/</code> sau khi clone lỗi.</td></tr>
+              <tr><td><code>GET /sessions</code> trên Appium server cục bộ báo "unknown command"</td><td>Đúng như dự kiến: route đó chỉ thuộc JSONWP cũ, không nằm trong bề mặt W3C mà bản Appium này cung cấp. Kiểm tra tab Session Information trong Inspector thay vào đó.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    webdriverio-mobile-typescript &middot; written from this session's Appium Inspector setup and locator/gesture work
+  </footer>
+
+</div>
+</body>
+</html>

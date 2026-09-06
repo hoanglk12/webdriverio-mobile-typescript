@@ -1,0 +1,21 @@
+{
+  "name": "doubleTap (approximation)",
+  "description": "Approximates GestureHelper.doubleTap(element) in utils/gestureHelper.ts, which actually issues two separate element.click() WebDriver calls 100ms apart rather than a single action chain - this file models that as two down/up cycles at the same point so it can be tested as one gesture here. Coordinates default to screen center (50%,50%); move before executing.",
+  "actions": [
+    {
+      "name": "pointer1",
+      "color": "#FF3333",
+      "id": "1",
+      "ticks": [
+        { "id": "1.1", "type": "pointerMove", "x": 50, "y": 50, "duration": 0 },
+        { "id": "1.2", "type": "pointerDown", "button": 0 },
+        { "id": "1.3", "type": "pause", "duration": 50 },
+        { "id": "1.4", "type": "pointerUp", "button": 0 },
+        { "id": "1.5", "type": "pause", "duration": 100 },
+        { "id": "1.6", "type": "pointerDown", "button": 0 },
+        { "id": "1.7", "type": "pause", "duration": 50 },
+        { "id": "1.8", "type": "pointerUp", "button": 0 }
+      ]
+    }
+  ]
+}

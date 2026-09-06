@@ -1,0 +1,17 @@
+{
+  "name": "longPress (2000ms)",
+  "description": "Mirrors GestureHelper.longPress(element, 2000) in utils/gestureHelper.ts. Coordinates default to screen center (50%,50%) as a placeholder - after importing, drag the tick's dot on the screenshot (or edit x/y in the tick card) to the center of the element you actually want to long-press, e.g. read its bounds from Inspector's Box Model panel.",
+  "actions": [
+    {
+      "name": "pointer1",
+      "color": "#FF3333",
+      "id": "1",
+      "ticks": [
+        { "id": "1.1", "type": "pointerMove", "x": 50, "y": 50, "duration": 0 },
+        { "id": "1.2", "type": "pointerDown", "button": 0 },
+        { "id": "1.3", "type": "pause", "duration": 2000 },
+        { "id": "1.4", "type": "pointerUp", "button": 0 }
+      ]
+    }
+  ]
+}
