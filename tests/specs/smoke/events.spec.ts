@@ -47,6 +47,41 @@ describe('Events Screen (FrontRow)', () => {
     AllureReporter.addStep(`Filter chips rendered: ${chips.join(', ')}`);
   });
 
+  it('SMK-03 — search returns a match', async () => {
+    AllureReporter.addStory('Search filters the event list');
+    AllureReporter.addDescription(
+      'Typing into the search field filters the event list live (no submit action). A ' +
+        'nonsense query is checked first as a negative control, proving the field actually ' +
+        'filters, before the real query is checked to narrow the list to exactly the ' +
+        'expected event.'
+    );
+
+    await EventsPage.waitForEventsPage();
+
+    // Negative control: with only one event seeded right now, a positive-only assertion
+    // below could pass even if search were a no-op. A nonsense term must return zero.
+    await EventsPage.searchEvents(frontRow.search.nonMatchingTerm);
+    await EventsPage.waitForEventCount(0);
+    AllureReporter.addStep('Confirmed search is live: a nonsense term returns zero events');
+
+    await EventsPage.searchEvents(frontRow.search.term);
+    await EventsPage.waitForEventCount(1);
+    AllureReporter.addStep(`Searched "${frontRow.search.term}"`);
+
+    const labels = await EventsPage.getEventCardLabels();
+    expect(
+      labels,
+      `Search for "${frontRow.search.term}" should narrow the list to exactly one event`
+    ).to.have.lengthOf(1);
+    expect(
+      labels[0],
+      `The single result should be "${frontRow.search.expectedEventTitle}": ${labels[0]}`
+    ).to.include(frontRow.search.expectedEventTitle);
+    AllureReporter.addStep(`Result: ${labels[0]}`);
+
+    await EventsPage.clearSearch();
+  });
+
   afterEach(async function () {
     if (this.currentTest?.state === 'failed') {
       AllureReporter.addAttachment(

@@ -560,6 +560,18 @@
           <div class="finding-top"><span class="tag note">correction</span><h3>The filter chips are All, Indie Rock, Classical, Electronic, Folk</h3></div>
           <p>There is no Featured chip. "Featured" is only a badge on one event card. An earlier field note recorded this wrong. There is also a fourth bottom tab, Debug, that was not previously documented.</p>
         </div>
+        <div class="finding note">
+          <div class="finding-top"><span class="tag note">environment drift</span><h3>The "All" filter now shows one event, not two</h3></div>
+          <p>This catalog was captured 9 Aug 2026 with two events under "All" (see SMK-03 and E2E-01, which both assume a second event that disappears/narrows away on search). As of 6 Sep 2026, only <code>events.item.evt_005</code> ("Zenith Tour — Tokyo Night One", dated Tue Sep 22) remains; the other event is gone from the signed-out default list. Unconfirmed hypothesis: the app only lists upcoming events and the missing one's date has since passed — there is no seed-reset control in the Debug tab to check this directly. SMK-03's implementation (<code>tests/specs/smoke/events.spec.ts</code>) was written catalog-size-agnostic for this reason: it proves the search field actually filters (a nonsense query must return zero results) and then asserts the expected event is present, rather than asserting a fixed before/after count. Any future implementation of E2E-01 step 2 ("confirm two events") should do the same.</p>
+        </div>
+        <div class="finding note">
+          <div class="finding-top"><span class="tag note">automation note</span><h3>The event list filters live and asynchronously — don't read it right after typing</h3></div>
+          <p><code>events.searchInput</code> re-filters <code>events.list</code> on every keystroke with no submit action, but the re-render can lag the driver's <code>setValue</code> response by roughly 1-5s on this device. Reading card count/labels immediately after typing is flaky — it can catch the list mid-filter. <code>EventsPage.waitForEventCount(expected)</code> polls instead of reading once; use it (or the same pattern) for any future search/filter assertion on this screen.</p>
+        </div>
+        <div class="finding note">
+          <div class="finding-top"><span class="tag note">automation note</span><h3><code>hideKeyboard()</code> reliably fails on this device and costs ~11s per call</h3></div>
+          <p><code>browser.hideKeyboard()</code> throws <code>WebDriverError: The software keyboard cannot be hidden when running "appium/device/hide_keyboard"</code> on this Genymotion image, retried 3x by the WebDriver client before giving up (~11s), then swallowed by <code>BasePage.hideKeyboard()</code>'s own try/catch — so it doesn't fail tests, it just silently burns time and logs an error every call. Root cause unconfirmed (likely this vbox86 image's AOSP keyboard not supporting the ADJUST_RESIZE-based hide strategy). Search filtering and element queries both work fine with the keyboard still showing, so <code>EventsPage.searchEvents()</code> deliberately skips the hide-keyboard step; don't add it back by convention until this is root-caused.</p>
+        </div>
       </div>
     </section>
 

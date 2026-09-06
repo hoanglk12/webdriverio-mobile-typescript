@@ -39,6 +39,15 @@ export class EventsPage extends BasePage {
   }
 
   /**
+   * Collection of event cards currently rendered in the list.
+   * Each card's testID is per-event (`events.item.<eventId>`, e.g. `events.item.evt_005`),
+   * so cards are matched by resource-id prefix rather than an exact id.
+   */
+  private get eventCards() {
+    return $$('android=new UiSelector().resourceIdMatches("events.item..*")');
+  }
+
+  /**
    * Parameterized getter for a genre filter chip by its testID slug.
    * @param slug - Chip slug, e.g. "all", "indie-rock", "j-pop"
    */
@@ -105,6 +114,60 @@ export class EventsPage extends BasePage {
       }
     }
     return true;
+  }
+
+  /**
+   * Search the event list by title, artist, or city.
+   * The list filters live as the query text changes — there is no submit button/action.
+   * `setValue` clears any existing query first, so this also replaces a prior search term.
+   * @param term - Search text
+   */
+  async searchEvents(term: string): Promise<void> {
+    await this.click(this.searchInput);
+    await this.setValue(this.searchInput, term);
+  }
+
+  /**
+   * Clear the search field, restoring the unfiltered event list.
+   */
+  async clearSearch(): Promise<void> {
+    await this.setValue(this.searchInput, '');
+  }
+
+  /**
+   * Number of event cards currently rendered in the list.
+   */
+  async getEventCount(): Promise<number> {
+    const cards = await this.eventCards;
+    return cards.length;
+  }
+
+  /**
+   * Wait for the event list to settle at an expected card count.
+   * The list re-filters live and asynchronously as the search query changes, so a count
+   * read immediately after `searchEvents` can catch a transient in-between state.
+   * @param expectedCount - Number of cards the list should settle at
+   * @param timeout - Timeout in milliseconds
+   */
+  async waitForEventCount(expectedCount: number, timeout: number = 5000): Promise<void> {
+    await browser.waitUntil(async () => (await this.getEventCount()) === expectedCount, {
+      timeout,
+      timeoutMsg: `Event list did not settle at ${expectedCount} card(s) within ${timeout}ms`,
+    });
+  }
+
+  /**
+   * Accessible labels of every event card currently rendered (title, artist, and venue —
+   * e.g. "Zenith Tour — Tokyo Night One at Tokyo Dome"). Cards expose no separate
+   * title-only testID, so the card's own accessible label is read instead.
+   */
+  async getEventCardLabels(): Promise<string[]> {
+    const cards = await this.eventCards;
+    const labels: string[] = [];
+    for (const card of cards) {
+      labels.push((await this.getAttribute(card, 'content-desc')) ?? '');
+    }
+    return labels;
   }
 }
 

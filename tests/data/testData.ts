@@ -54,6 +54,18 @@ export const frontRow = {
 
   /** Bottom tab bar entries, in display order (testID slugs, `tab.<slug>`). */
   bottomNavTabSlugs: ['events', 'myTickets', 'profile', 'debug'],
+
+  /**
+   * SMK-03 search fixture: a query that matches exactly one seeded event
+   * (`events.item.evt_005`, title "Zenith Tour — Tokyo Night One"), plus a
+   * nonsense term (shared with SMK-04) used as a negative control to prove
+   * the search is actually filtering rather than leaving the list untouched.
+   */
+  search: {
+    term: 'Tokyo',
+    expectedEventTitle: 'Zenith Tour — Tokyo Night One',
+    nonMatchingTerm: 'zzzznoresults',
+  },
 };
 
 /**
