@@ -217,13 +217,30 @@ jobs:
           path: reports/screenshots
           retention-days: 7
 
+  check-browserstack-secrets:
+    name: Check BrowserStack Secrets
+    runs-on: ubuntu-latest
+    outputs:
+      has-secrets: ${{ steps.check.outputs.has-secrets }}
+    steps:
+      - name: Check secrets are configured
+        id: check
+        # The secrets context isn't available in a job-level `if:`, so the
+        # presence check has to happen in a step and get passed along as an output.
+        run: |
+          if [ -n "${{ secrets.BROWSERSTACK_USERNAME }}" ] && [ -n "${{ secrets.BROWSERSTACK_ACCESS_KEY }}" ]; then
+            echo "has-secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-secrets=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test-browserstack:
     name: BrowserStack Tests
     runs-on: ubuntu-latest
-    needs: lint-and-typecheck
+    needs: [lint-and-typecheck, check-browserstack-secrets]
     # Skips cleanly on forks/PRs where the secrets aren't configured yet,
     # rather than failing the whole run over a missing BrowserStack account.
-    if: ${{ secrets.BROWSERSTACK_USERNAME != '' && secrets.BROWSERSTACK_ACCESS_KEY != '' }}
+    if: needs.check-browserstack-secrets.outputs.has-secrets == 'true'
 
     steps:
       - name: Checkout code
