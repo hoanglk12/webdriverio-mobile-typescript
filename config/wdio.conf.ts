@@ -67,7 +67,14 @@ export const config: WebdriverIO.Config = {
       {
         command: 'appium',
         args: {
-          address: process.env.APPIUM_HOST || 'localhost',
+          // @wdio/appium-service's WebDriver client always connects to the
+          // literal 127.0.0.1 (its DEFAULT_CONNECTION.hostname is hardcoded,
+          // independent of this address). Binding the server to 'localhost'
+          // let Node's DNS resolution put it on IPv6 (::1) on this CI runner,
+          // so the client's IPv4 connection got ECONNREFUSED even though
+          // Appium was up and healthy the whole time. Bind to the same literal
+          // IPv4 address the client uses.
+          address: process.env.APPIUM_HOST || '127.0.0.1',
           port: parseInt(process.env.APPIUM_PORT || '4723'),
           relaxedSecurity: true,
           allowInsecure: ['chromedriver_autodownload'],
