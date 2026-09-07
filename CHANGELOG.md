@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Framework
+
 - WebdriverIO v8+ integration with TypeScript
 - Mocha test framework configuration
 - Chai assertion library with custom assertions
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BasePage class with common mobile interactions
 
 #### Testing Capabilities
+
 - Android test configuration (UiAutomator2)
 - iOS test configuration (XCUITest)
 - Cross-platform support
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API testing integration with Axios
 
 #### Utilities
+
 - Winston logger with multiple transports
 - Custom assertion helpers
 - Gesture helper for mobile interactions (swipe, scroll, tap, etc.)
@@ -32,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Helper utilities (retry, wait, random data generation)
 
 #### Reporting
+
 - Allure reporting integration
 - Screenshot capture on test failures
 - Video recording capability
@@ -39,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Step-by-step execution tracking
 
 #### Code Quality
+
 - ESLint configuration for TypeScript
 - Prettier code formatting
 - Husky pre-commit hooks
@@ -46,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Type definitions for WebdriverIO
 
 #### CI/CD
+
 - GitHub Actions workflow
   - Automated linting and type checking
   - Android emulator testing
@@ -57,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker Compose configuration
 
 #### Documentation
+
 - Comprehensive README with setup instructions
 - Contributing guidelines
 - Troubleshooting guide
@@ -64,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API documentation
 
 #### Test Examples
+
 - Login page object example
 - Home page object example
 - Smoke test suite
@@ -72,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Data-driven test examples
 
 #### Configuration
+
 - Environment-based configuration
 - Platform-specific configurations
 - Test suites (smoke, regression)
@@ -81,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 
 #### Dependencies
+
 - @wdio/cli: ^8.27.0
 - @wdio/mocha-framework: ^8.27.0
 - @wdio/allure-reporter: ^8.27.0
@@ -90,6 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - winston: ^3.11.0
 
 #### Supported Platforms
+
 - Android: API Level 28+
 - iOS: iOS 14.0+
 - Node.js: 18.0.0+
@@ -97,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Features by Category
 
 **Mobile Automation**
+
 - Element interaction (click, type, swipe)
 - Gesture support (swipe, scroll, pinch, zoom)
 - Keyboard handling
@@ -104,18 +116,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Platform-specific actions
 
 **Test Organization**
+
 - Page Object Model pattern
 - Reusable components
 - Test data management
 - Fixture support
 
 **Execution**
+
 - Sequential execution
 - Parallel execution
 - Suite-based execution
 - Platform-specific execution
 
 **Reporting**
+
 - Allure HTML reports
 - Test history tracking
 - Flaky test detection
@@ -123,12 +138,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Step-by-step logs
 
 ### Breaking Changes
+
 - None (initial release)
 
 ### Known Issues
+
 - None
 
 ### Migration Guide
+
 - Not applicable (initial release)
 
 ---
@@ -138,6 +156,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Unreleased] - 2026-08-08
 
 #### Changed
+
 - Bumped all dependencies to latest, including majors: `appium` 2→3, `appium-uiautomator2-driver` 3→8, `appium-xcuitest-driver` 7→12, `chai` 4→6, `eslint` 8→10, `dotenv` 16→17, `webdriverio`/`@wdio/*` → 9.29–9.30.x, plus `winston`, `prettier`, `husky`, `lint-staged`, `rimraf`, `allure-commandline`.
 - Migrated the whole project from CommonJS to native ESM (`"type": "module"`) — required because `chai@6` dropped CommonJS support.
 - Replaced `ts-node` with `tsx` as the TypeScript execution engine, per WebdriverIO 9's current documented recommendation.
@@ -147,10 +166,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped Node.js requirement to `^20.19.0 || ^22.12.0 || >=24.0.0` (CI, Dockerfile, setup scripts) to satisfy `appium@3`/`eslint@10` engine ranges.
 
 #### Fixed
+
 - `tests/specs/verification/framework.spec.ts` used `__dirname`, which is undefined under ESM — replaced with an `import.meta.url`-derived equivalent.
 - Removed a dead `tsconfig-paths/register` mocha require (no path aliases were configured, and the package wasn't even a declared dependency).
 
 #### Known limitations
+
 - `typescript` is intentionally pinned to `^6.0.3`, not the newest `7.0.2` (the native-compiler rewrite), because `@typescript-eslint` v8.66's peer range (`>=4.8.4 <6.1.0`) doesn't support TS7 yet.
 - `appium-doctor` stays at 1.16.2 — it's an unmaintained standalone tool predating Appium 2+'s built-in doctor tooling.
 

@@ -134,7 +134,7 @@ describe('My First Test', () => {
   it('should launch the app', async () => {
     // Get app package name (Android) or bundle ID (iOS)
     const appId = await driver.getCurrentPackage();
-    
+
     // Verify app is running
     expect(appId).to.not.be.empty;
   });

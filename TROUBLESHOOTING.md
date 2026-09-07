@@ -19,6 +19,7 @@ Common issues and solutions for the Mobile Automation Framework.
 **Problem**: Tests fail with Node.js compatibility errors
 
 **Solution**:
+
 ```bash
 # Check Node version
 node --version
@@ -34,6 +35,7 @@ nvm use 22
 **Problem**: Dependencies fail to install
 
 **Solution**:
+
 ```bash
 # Clear npm cache
 npm cache clean --force
@@ -50,6 +52,7 @@ npm install
 **Problem**: Pre-commit hooks don't run
 
 **Solution**:
+
 ```bash
 # Reinstall Husky
 npm run prepare
@@ -68,6 +71,7 @@ npx husky install
 **Problem**: Appium server fails to start on port 4723
 
 **Solution**:
+
 ```bash
 # Check if port is in use
 # Windows
@@ -92,6 +96,7 @@ appium
 **Problem**: `Error: No driver found for automationName 'UiAutomator2'`
 
 **Solution**:
+
 ```bash
 # List installed drivers
 appium driver list
@@ -109,6 +114,7 @@ appium driver update uiautomator2
 **Problem**: `appium-doctor` shows missing dependencies
 
 **Solution**:
+
 ```bash
 # Run doctor for Android
 npx appium-doctor --android
@@ -138,6 +144,7 @@ sudo xcode-select --switch /Applications/Xcode.app
 **Problem**: `Error: Could not find a connected Android device`
 
 **Solution**:
+
 ```bash
 # List available AVDs
 emulator -list-avds
@@ -158,6 +165,7 @@ adb start-server
 **Problem**: App fails to install on Android device/emulator
 
 **Solution**:
+
 ```bash
 # Verify APK exists
 ls -la ./apps/android/app-debug.apk
@@ -180,6 +188,7 @@ adb shell pm clear com.example.app
 **Problem**: `Error: UiAutomator2 server not responding`
 
 **Solution**:
+
 ```bash
 # Clear UiAutomator2 server
 adb shell pm clear io.appium.uiautomator2.server
@@ -198,6 +207,7 @@ adb reboot
 **Problem**: Android emulator runs very slowly
 
 **Solution**:
+
 ```bash
 # Enable hardware acceleration
 # Add to AVD config:
@@ -218,6 +228,7 @@ emulator -avd <AVD_NAME> -memory 2048
 **Problem**: iOS simulator fails to boot
 
 **Solution**:
+
 ```bash
 # List available simulators
 xcrun simctl list devices
@@ -238,6 +249,7 @@ xcrun simctl shutdown all
 **Problem**: XCUITest fails with WebDriverAgent errors
 
 **Solution**:
+
 ```bash
 # Rebuild WebDriverAgent
 cd ~/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent
@@ -255,6 +267,7 @@ open WebDriverAgent.xcodeproj
 **Problem**: `Error: App '/path/to/app.app' doesn't exist`
 
 **Solution**:
+
 ```bash
 # For .app bundles
 # Verify path is correct
@@ -272,6 +285,7 @@ xcodebuild -project YourApp.xcodeproj -scheme YourApp -sdk iphonesimulator -conf
 **Problem**: Tests fail with Xcode compatibility errors
 
 **Solution**:
+
 ```bash
 # Check Xcode version
 xcodebuild -version
@@ -295,20 +309,23 @@ xcode-select --install
 **Solutions**:
 
 1. **Increase wait timeout**:
+
 ```typescript
 await element.waitForDisplayed({ timeout: 30000 });
 ```
 
 2. **Verify selector**:
+
 ```typescript
 // Try different selector strategies
-$('~accessibility-id')
-$('id=resource-id')
-$('android=new UiSelector().text("Login")')
-$('-ios class chain:**/XCUIElementTypeButton[`label == "Login"`]')
+$('~accessibility-id');
+$('id=resource-id');
+$('android=new UiSelector().text("Login")');
+$('-ios class chain:**/XCUIElementTypeButton[`label == "Login"`]');
 ```
 
 3. **Check element hierarchy**:
+
 ```bash
 # Get page source
 await driver.getPageSource()
@@ -319,14 +336,15 @@ await driver.getPageSource()
 **Problem**: Tests timeout frequently
 
 **Solution**:
+
 ```typescript
 // Increase default timeout in wdio.conf.ts
 mochaOpts: {
-  timeout: 120000  // 2 minutes
+  timeout: 120000; // 2 minutes
 }
 
 // Or per-test basis
-it('long running test', async function() {
+it('long running test', async function () {
   this.timeout(180000); // 3 minutes
   // test code
 });
@@ -339,6 +357,7 @@ it('long running test', async function() {
 **Solutions**:
 
 1. **Add explicit waits**:
+
 ```typescript
 // ❌ Bad
 await element.click();
@@ -349,15 +368,17 @@ await element.click();
 ```
 
 2. **Wait for animations**:
+
 ```typescript
 await driver.pause(500); // Wait for animations
 ```
 
 3. **Retry failed tests**:
+
 ```typescript
 // In wdio.conf.ts
 mochaOpts: {
-  retries: 2  // Retry failed tests twice
+  retries: 2; // Retry failed tests twice
 }
 ```
 
@@ -366,6 +387,7 @@ mochaOpts: {
 **Problem**: Screenshots not saved on failure
 
 **Solution**:
+
 ```bash
 # Create screenshots directory
 mkdir -p reports/screenshots
@@ -386,6 +408,7 @@ SCREENSHOT_DIR=./reports/screenshots
 **Solutions**:
 
 1. **Check environment variables**:
+
 ```yaml
 # Add to workflow
 env:
@@ -394,12 +417,14 @@ env:
 ```
 
 2. **Enable debug logging**:
+
 ```yaml
 - name: Run tests
   run: npm test -- --logLevel=debug
 ```
 
 3. **Upload artifacts**:
+
 ```yaml
 - name: Upload logs
   if: always()
@@ -414,6 +439,7 @@ env:
 **Problem**: Tests fail in Docker container
 
 **Solution**:
+
 ```bash
 # Check container logs
 docker-compose logs -f test-runner
@@ -436,17 +462,20 @@ docker system prune -a
 **Solutions**:
 
 1. **Enable parallel execution**:
+
 ```typescript
 // wdio.conf.ts
-maxInstances: 4
+maxInstances: 4;
 ```
 
 2. **Reduce logging**:
+
 ```typescript
-logLevel: 'error'  // Instead of 'debug'
+logLevel: 'error'; // Instead of 'debug'
 ```
 
 3. **Optimize waits**:
+
 ```typescript
 // Use shorter implicit wait
 await driver.setImplicitTimeout(3000);
@@ -457,6 +486,7 @@ await driver.setImplicitTimeout(3000);
 **Problem**: Out of memory errors
 
 **Solution**:
+
 ```bash
 # Increase Node.js memory
 export NODE_OPTIONS="--max-old-space-size=4096"
@@ -470,18 +500,20 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 If you can't resolve your issue:
 
 1. **Check logs**:
+
 ```bash
 tail -f reports/logs/test-execution.log
 ```
 
 2. **Enable debug mode**:
+
 ```bash
 export LOG_LEVEL=debug
 npm test
 ```
 
 3. **Search existing issues**:
-https://github.com/your-org/webdriverio-mobile-typescript/issues
+   https://github.com/your-org/webdriverio-mobile-typescript/issues
 
 4. **Create new issue** with:
    - Error message

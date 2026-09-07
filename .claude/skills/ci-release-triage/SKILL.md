@@ -28,6 +28,7 @@ lint-and-typecheck (ubuntu, gate)
 ## Where to look for failure evidence
 
 Each test job uploads (with `if: always()` or `if: failure()`):
+
 - `allure-results-android-<api-level>` / `allure-results-ios-<ios-version>` — raw Allure results, retained 30 days.
 - `screenshots-android-<api-level>` / `screenshots-ios-<ios-version>` — only uploaded `if: failure()`, retained 7 days.
 - `logs-android-<api-level>` (Android only) — Winston logs, retained 7 days.
@@ -45,4 +46,4 @@ Download the relevant artifact from the failed run rather than re-running blind.
 
 ## Scope note
 
-This skill is for the CI *pipeline* itself. If a test fails inside a job and you need to know what happened on the emulated device at that moment (not why the job infrastructure failed), that's `appium-failure-triage`'s territory, applied to a local reproduction of the failing spec.
+This skill is for the CI _pipeline_ itself. If a test fails inside a job and you need to know what happened on the emulated device at that moment (not why the job infrastructure failed), that's `appium-failure-triage`'s territory, applied to a local reproduction of the failing spec.

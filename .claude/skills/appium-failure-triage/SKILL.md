@@ -5,7 +5,7 @@ description: Use when an Appium/WebdriverIO test in this framework fails mid-run
 
 # Triaging a failing Appium test with `appium-mcp`
 
-This is for a test that *ran* (a session started) but failed on an assertion, a "element not found" / timeout, or unexpected app behavior — situations where reading the stack trace alone leaves the real cause (stale selector vs. timing vs. wrong screen vs. permission dialog) ambiguous.
+This is for a test that _ran_ (a session started) but failed on an assertion, a "element not found" / timeout, or unexpected app behavior — situations where reading the stack trace alone leaves the real cause (stale selector vs. timing vs. wrong screen vs. permission dialog) ambiguous.
 
 Requires the `appium-mcp` MCP server (registered project-scoped in `.mcp.json`, package `appium-mcp`, official `appium/appium-mcp`). If its tools (`mcp__appium-mcp__*`) aren't loaded yet, `ToolSearch` for them first.
 
@@ -19,7 +19,7 @@ Requires the `appium-mcp` MCP server (registered project-scoped in `.mcp.json`, 
 3. **Take a screenshot via the MCP tool** at the failure point. Compare it against the framework's own on-failure capture in `reports/screenshots/` from the same run — two vantage points on the same moment often disambiguate "wrong screen entirely" from "right screen, wrong selector."
 4. **Check session/app state**: current context (native vs. webview — a webview element won't resolve via a native accessibility-ID selector), foreground app (did an OS permission dialog or a crash overlay steal focus?), app permission state (a first-run permission prompt can block every subsequent selector if a page object doesn't handle it).
 5. **Cross-reference `reports/logs/`** (Winston output — every `BasePage` action call logs before/after) for the last successfully logged action before the failure, to narrow down exactly which step in a multi-step page object method (e.g. `login()` = enterUsername → enterPassword → hideKeyboard → click) is where things actually diverged.
-6. **Only reach for AI-vision element finding** (if the `appium-mcp` server has vision configured) once traditional locators are confirmed genuinely absent or renamed with no accessibility-ID convention available. This repo's convention is accessibility-id-first (`mobile-page-object-authoring`) — vision-based finding is a diagnostic aid to confirm *what's on screen*, not a replacement for fixing the actual selector in the page object.
+6. **Only reach for AI-vision element finding** (if the `appium-mcp` server has vision configured) once traditional locators are confirmed genuinely absent or renamed with no accessibility-ID convention available. This repo's convention is accessibility-id-first (`mobile-page-object-authoring`) — vision-based finding is a diagnostic aid to confirm _what's on screen_, not a replacement for fixing the actual selector in the page object.
 
 ## Output
 

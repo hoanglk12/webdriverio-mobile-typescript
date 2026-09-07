@@ -45,4 +45,4 @@ Don't assume `error.response` exists without the `isAxiosError` guard — a netw
 
 ## Scope note
 
-This repo's API surface (`api.example.com`) is currently a placeholder/demo target with no real auth or business logic to attack — this skill is about writing *functional* API tests that match the existing pattern, not security testing. If real security testing of an API becomes a goal, that's a separate concern (OWASP API Top 10 tooling), not this convention.
+This repo's API surface (`api.example.com`) is currently a placeholder/demo target with no real auth or business logic to attack — this skill is about writing _functional_ API tests that match the existing pattern, not security testing. If real security testing of an API becomes a goal, that's a separate concern (OWASP API Top 10 tooling), not this convention.

@@ -28,18 +28,18 @@ Enterprise-style Mobile Automation Framework: WebdriverIO 9 + Appium 3 + Mocha +
 
 ## npm scripts
 
-| Script | Purpose |
-|---|---|
-| `test` / `test:android` / `test:ios` | Run the base / Android / iOS wdio config |
-| `test:smoke` / `test:regression` | Filter to one suite |
-| `test:parallel` | Run all specs via glob |
-| `test:verify` | `type-check` + `lint` gate (no test execution) |
-| `verify` | Runs `verify-framework.ps1` (fuller environment sanity check) |
-| `lint` / `lint:fix` | ESLint |
-| `format` / `format:check` | Prettier |
-| `type-check` | `tsc --noEmit` |
-| `allure:generate` / `allure:open` / `allure:report` | Allure reporting from `reports/allure-results` |
-| `appium` / `appium:doctor` | Run local Appium server / doctor diagnostics |
+| Script                                              | Purpose                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------- |
+| `test` / `test:android` / `test:ios`                | Run the base / Android / iOS wdio config                      |
+| `test:smoke` / `test:regression`                    | Filter to one suite                                           |
+| `test:parallel`                                     | Run all specs via glob                                        |
+| `test:verify`                                       | `type-check` + `lint` gate (no test execution)                |
+| `verify`                                            | Runs `verify-framework.ps1` (fuller environment sanity check) |
+| `lint` / `lint:fix`                                 | ESLint                                                        |
+| `format` / `format:check`                           | Prettier                                                      |
+| `type-check`                                        | `tsc --noEmit`                                                |
+| `allure:generate` / `allure:open` / `allure:report` | Allure reporting from `reports/allure-results`                |
+| `appium` / `appium:doctor`                          | Run local Appium server / doctor diagnostics                  |
 
 ## Related project-level skills
 

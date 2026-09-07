@@ -25,6 +25,7 @@ This repo follows a specific, already-established Page Object Model shape (see `
 ## 2. Gestures beyond simple tap/type
 
 Use `GestureHelper` (`utils/gestureHelper.ts`) — don't call `driver.performActions` directly in a page object:
+
 - `GestureHelper.swipeVertical/swipeHorizontal(startPct, endPct, duration)`
 - `GestureHelper.scrollToElement(element, maxScrolls, direction)`
 - `GestureHelper.longPress(element, duration)`, `GestureHelper.doubleTap(element)`
@@ -35,7 +36,7 @@ Use `GestureHelper` (`utils/gestureHelper.ts`) — don't call `driver.performAct
 
 Use `Assertions` (`utils/assertions.ts`) for mobile-specific checks in specs — `Assertions.assertDisplayed(el)`, `assertTextEquals(el, expected)`, `assertTextContains`, `assertAttributeEquals`, `assertClickable`, `assertEnabled/Disabled`, `assertElementsCount`, `assertUrlContains`, and `Assertions.softAssert(condition, message)` for non-fatal checks. Use plain Chai `expect(...)` for everything else (non-element values, API responses, plain booleans).
 
-**Never call `element.isClickable()` or `element.waitForClickable()` directly** — WebdriverIO throws for both in native mobile app context ("Method not supported in mobile native environment" / "only available for desktop and mobile browsers"). `BasePage.isClickable()`/`click()`/`waitForElementClickable()` and `Assertions.assertClickable()` already check the platform-native `clickable` attribute (Android) / `isEnabled()` (iOS) instead — always go through those rather than the raw WebdriverIO methods. If you add a *new* clickability-adjacent helper, verify it against a live device before trusting it (this bug stayed hidden until a real `.click()`/`assertClickable()` call was exercised — see `running-mobile-tests-appium`'s Genymotion section for why environment failures can mask whether a code path even ran).
+**Never call `element.isClickable()` or `element.waitForClickable()` directly** — WebdriverIO throws for both in native mobile app context ("Method not supported in mobile native environment" / "only available for desktop and mobile browsers"). `BasePage.isClickable()`/`click()`/`waitForElementClickable()` and `Assertions.assertClickable()` already check the platform-native `clickable` attribute (Android) / `isEnabled()` (iOS) instead — always go through those rather than the raw WebdriverIO methods. If you add a _new_ clickability-adjacent helper, verify it against a live device before trusting it (this bug stayed hidden until a real `.click()`/`assertClickable()` call was exercised — see `running-mobile-tests-appium`'s Genymotion section for why environment failures can mask whether a code path even ran).
 
 ## 4. Test data
 

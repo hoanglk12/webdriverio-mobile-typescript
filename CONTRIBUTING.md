@@ -189,7 +189,7 @@ async login(username: string, password: string): Promise<void> {
   // Enter credentials
   await this.setValue(this.usernameInput, username);
   await this.setValue(this.passwordInput, password);
-  
+
   // Submit form
   await this.click(this.loginButton);
 }
@@ -339,20 +339,24 @@ feat(login): add remember me functionality
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Manual testing completed
 
 ## Checklist
+
 - [ ] Code follows style guidelines
 - [ ] Self-review completed
 - [ ] Comments added for complex code
@@ -361,6 +365,7 @@ Brief description of changes
 - [ ] Tests pass locally
 
 ## Related Issues
+
 Closes #123
 ```
 

@@ -287,10 +287,10 @@ import { validUsers } from '../data/testData';
 describe('Login Feature', () => {
   it('should login successfully', async () => {
     const user = validUsers[0];
-    
+
     await LoginPage.waitForLoginPage();
     await LoginPage.login(user.username, user.password);
-    
+
     // Assertions
     const isHomeDisplayed = await HomePage.isHomePageDisplayed();
     expect(isHomeDisplayed).to.be.true;
@@ -470,7 +470,7 @@ npm run type-check
 - Increase timeout in `wdio.conf.ts`:
   ```typescript
   mochaOpts: {
-    timeout: 120000  // 2 minutes
+    timeout: 120000; // 2 minutes
   }
   ```
 

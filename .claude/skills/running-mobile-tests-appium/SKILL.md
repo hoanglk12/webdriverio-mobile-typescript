@@ -15,18 +15,18 @@ description: Use when the user wants to run this framework's mobile test suite l
 
 ## Picking the right script
 
-| Goal | Script |
-|---|---|
-| Run against whichever config is default | `npm test` (`config/wdio.conf.ts`) |
-| Run Android specifically | `npm run test:android` (`config/wdio.android.conf.ts`) |
-| Run iOS specifically | `npm run test:ios` (`config/wdio.ios.conf.ts`, macOS only) |
-| Only smoke-tagged suite | `npm run test:smoke` |
-| Only regression suite | `npm run test:regression` |
-| Every spec regardless of suite | `npm run test:parallel` |
-| Just verify code quality, no device run | `npm run test:verify` (type-check + lint) |
-| Fuller environment sanity check | `npm run verify` (runs `verify-framework.ps1`) |
+| Goal                                           | Script                                                                           |
+| ---------------------------------------------- | -------------------------------------------------------------------------------- |
+| Run against whichever config is default        | `npm test` (`config/wdio.conf.ts`)                                               |
+| Run Android specifically                       | `npm run test:android` (`config/wdio.android.conf.ts`)                           |
+| Run iOS specifically                           | `npm run test:ios` (`config/wdio.ios.conf.ts`, macOS only)                       |
+| Only smoke-tagged suite                        | `npm run test:smoke`                                                             |
+| Only regression suite                          | `npm run test:regression`                                                        |
+| Every spec regardless of suite                 | `npm run test:parallel`                                                          |
+| Just verify code quality, no device run        | `npm run test:verify` (type-check + lint)                                        |
+| Fuller environment sanity check                | `npm run verify` (runs `verify-framework.ps1`)                                   |
 | Run Android on BrowserStack instead of locally | `npm run test:browserstack:android` (`config/wdio.browserstack.android.conf.ts`) |
-| Run iOS on BrowserStack instead of locally | `npm run test:browserstack:ios` (`config/wdio.browserstack.ios.conf.ts`) |
+| Run iOS on BrowserStack instead of locally     | `npm run test:browserstack:ios` (`config/wdio.browserstack.ios.conf.ts`)         |
 
 Platform and suite choice matter — `test:android`/`test:ios` pick the capabilities config, `test:smoke`/`test:regression` pick which spec folder(s) under `tests/specs/` run. They compose: e.g. run Android smoke tests by using `wdio run ./config/wdio.android.conf.ts --suite smoke` directly if there's no combined npm script for the exact pairing you need.
 
@@ -69,5 +69,6 @@ Under ~3-4GB free (common with Chrome/Claude Code/WSL running alongside an 8GB-a
 **Rebooting the guest (`adb reboot`, or `VBoxManage poweroff`+`startvm`) does not fix this** — it reproduces identically because host memory pressure is untouched by rebooting the guest. If instability recurs identically across 2+ clean reboots, stop rebooting; either free host RAM or recreate the VM from a clean snapshot (`VBoxManage snapshot "<device>" restore <snapshot-name>`, or via Genymotion Manager) — repeated hard `poweroff`s can also degrade guest disk state over a troubleshooting session, so a snapshot restore fixes both causes at once.
 
 Two related gotchas when recreating/rebooting the VM:
+
 - **`adb shell getprop sys.boot_completed` is unreliable (often always empty)** on Genymotion's vbox86 images — don't gate any wait on it. Poll `adb shell service list | grep -E "activity:|package:|window:"` instead; full boot means all three are registered.
 - **A recreated/restarted VM can get a different DHCP-assigned IP** than before (e.g. `.101` → `.102`). Always confirm the live IP via `adb devices -l` (after `adb connect <ip>:5555`) rather than assuming a previously-known IP still applies.
