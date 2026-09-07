@@ -66,6 +66,22 @@ export const frontRow = {
     expectedEventTitle: 'Zenith Tour — Tokyo Night One',
     nonMatchingTerm: 'zzzznoresults',
   },
+
+  /**
+   * SMK-04/SMK-05 fixture: the empty-state copy shown in place of the event list
+   * when a search or filter chip matches nothing. Verified live — this text has
+   * no testID, so `EventsPage` matches it by exact rendered text.
+   */
+  emptyState: {
+    title: 'No events found',
+    subtitle: 'Try a different search term or clear the filters above.',
+  },
+
+  /**
+   * SMK-05 fixture: filter chip slug with a zero-match current seed (only
+   * `evt_005`, tagged J-Pop, exists) — selecting it should show the empty state.
+   */
+  zeroMatchFilterChipSlug: 'folk',
 };
 
 /**

@@ -82,6 +82,54 @@ describe('Events Screen (FrontRow)', () => {
     await EventsPage.clearSearch();
   });
 
+  it('SMK-04 — empty search state shows a clear message', async () => {
+    AllureReporter.addStory('No-match search shows a clear message');
+    AllureReporter.addDescription(
+      'Entering a nonsense search term that matches no event should clear the list ' +
+        'and show the "No events found" empty state with its guidance subtitle.'
+    );
+
+    await EventsPage.waitForEventsPage();
+
+    await EventsPage.searchEvents(frontRow.search.nonMatchingTerm);
+    await EventsPage.waitForEventCount(0);
+    AllureReporter.addStep(`Searched "${frontRow.search.nonMatchingTerm}"`);
+
+    const isEmptyStateDisplayed = await EventsPage.isEmptyStateDisplayed();
+    expect(
+      isEmptyStateDisplayed,
+      `Empty state ("${frontRow.emptyState.title}" / "${frontRow.emptyState.subtitle}") should be displayed for a non-matching search`
+    ).to.be.true;
+    AllureReporter.addStep('Empty state displayed');
+
+    await EventsPage.clearSearch();
+  });
+
+  it('SMK-05 — genre chip filters the list', async () => {
+    AllureReporter.addStory('A filter chip scopes the list');
+    AllureReporter.addDescription(
+      'Tapping a genre filter chip scopes the event list to that genre. With the ' +
+        'current seed, the Folk chip matches zero events, so selecting it should ' +
+        'show the same empty state as a non-matching search.'
+    );
+
+    await EventsPage.waitForEventsPage();
+    await EventsPage.clearSearch();
+
+    await EventsPage.selectFilterChip(frontRow.zeroMatchFilterChipSlug);
+    await EventsPage.waitForEventCount(0);
+    AllureReporter.addStep(`Selected filter chip "${frontRow.zeroMatchFilterChipSlug}"`);
+
+    const isEmptyStateDisplayed = await EventsPage.isEmptyStateDisplayed();
+    expect(
+      isEmptyStateDisplayed,
+      `Empty state should be displayed when the "${frontRow.zeroMatchFilterChipSlug}" chip matches zero events`
+    ).to.be.true;
+    AllureReporter.addStep('Empty state displayed');
+
+    await EventsPage.selectFilterChip('all');
+  });
+
   afterEach(async function () {
     if (this.currentTest?.state === 'failed') {
       AllureReporter.addAttachment(

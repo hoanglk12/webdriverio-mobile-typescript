@@ -56,6 +56,23 @@ export class EventsPage extends BasePage {
   }
 
   /**
+   * Empty-state title and subtitle, shown in place of the event list when a
+   * search or filter chip matches nothing. Verified live: this text has no
+   * testID/resource-id (plain `View`/`TextView`), so it's matched on its
+   * exact rendered text instead of the resourceId strategy used elsewhere
+   * on this screen.
+   */
+  private get emptyStateTitle() {
+    return $('android=new UiSelector().text("No events found")');
+  }
+
+  private get emptyStateSubtitle() {
+    return $(
+      'android=new UiSelector().text("Try a different search term or clear the filters above.")'
+    );
+  }
+
+  /**
    * Wait for the Events screen to finish loading.
    * The event list is the most reliable "loaded" indicator.
    */
@@ -114,6 +131,25 @@ export class EventsPage extends BasePage {
       }
     }
     return true;
+  }
+
+  /**
+   * Tap a genre filter chip by its testID slug, scoping the event list to that genre.
+   * @param slug - Chip testID slug (e.g. "folk", "all")
+   */
+  async selectFilterChip(slug: string): Promise<void> {
+    await this.click(this.filterChip(slug));
+  }
+
+  /**
+   * Check whether the "no events found" empty state is displayed, shown in place of
+   * the event list when the current search/filter combination matches nothing.
+   */
+  async isEmptyStateDisplayed(): Promise<boolean> {
+    return (
+      (await this.isDisplayed(this.emptyStateTitle)) &&
+      (await this.isDisplayed(this.emptyStateSubtitle))
+    );
   }
 
   /**
