@@ -71,6 +71,15 @@ export const config: WebdriverIO.Config = {
           port: parseInt(process.env.APPIUM_PORT || '4723'),
           relaxedSecurity: true,
           allowInsecure: ['chromedriver_autodownload'],
+          // Appium writes its own log file directly (via its --log CLI flag),
+          // independent of @wdio/appium-service's logPath piping below. The
+          // service pipes the child process's stdout/stderr into logPath only
+          // *after* its own startup-detection listener resolves and detaches -
+          // an async gap (it awaits fs.mkdir first) during which a crash right
+          // after "REST http interface listener started" is silently dropped,
+          // leaving logPath's file empty. This flag catches that case too,
+          // since Appium itself opens the file synchronously as part of --log.
+          log: './reports/logs/appium-server.log',
         },
         // Default is 30s. On this machine loading both the uiautomator2 and
         // xcuitest drivers (Appium loads every installed driver at boot,
