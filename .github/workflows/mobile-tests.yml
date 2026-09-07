@@ -91,7 +91,7 @@ jobs:
           npm install -g appium@3
           # macos-latest runner images ship Appium with uiautomator2 pre-registered,
           # so install only if it isn't already there.
-          appium driver list --installed | grep -q uiautomator2 || appium driver install uiautomator2
+          appium driver list --installed 2>&1 | grep -q uiautomator2 || appium driver install uiautomator2
 
       - name: AVD cache
         uses: actions/cache@v4
@@ -188,7 +188,7 @@ jobs:
           npm install -g appium@3
           # macos-latest runner images ship Appium with xcuitest pre-registered,
           # so install only if it isn't already there.
-          appium driver list --installed | grep -q xcuitest || appium driver install xcuitest
+          appium driver list --installed 2>&1 | grep -q xcuitest || appium driver install xcuitest
 
       - name: List available simulators
         run: xcrun simctl list devices available
