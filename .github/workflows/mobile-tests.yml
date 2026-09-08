@@ -122,6 +122,15 @@ jobs:
         env:
           ANDROID_APP_PATH: ${{ github.workspace }}/apps/android/FrontRow.apk
           ANDROID_PLATFORM_VERSION: ${{ matrix.platform-version }}
+          # Only one emulator/capability exists per job, but MAX_INSTANCES=2
+          # (the dev default) still starts overlapping UiAutomator2 sessions
+          # against that single device. Confirmed via wdio-appium.log: every
+          # "Appium Settings app is not running after 30000ms" failure showed
+          # 3-4 session IDs simultaneously polling/starting io.appium.settings
+          # on the same emulator-5554 (concurrent sessions plus a failed
+          # session's teardown overlapping the next one's startup). Force
+          # serial execution in CI.
+          MAX_INSTANCES: 1
         with:
           api-level: ${{ matrix.api-level }}
           arch: ${{ env.ANDROID_ARCH }}
