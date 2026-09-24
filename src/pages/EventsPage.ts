@@ -193,6 +193,14 @@ export class EventsPage extends BasePage {
   }
 
   /**
+   * Tap the first event card currently rendered in the list, opening its Event Detail screen.
+   */
+  async openFirstEventCard(): Promise<void> {
+    const cards = await this.eventCards;
+    await this.click(cards[0]);
+  }
+
+  /**
    * Accessible labels of every event card currently rendered (title, artist, and venue —
    * e.g. "Zenith Tour — Tokyo Night One at Tokyo Dome"). Cards expose no separate
    * title-only testID, so the card's own accessible label is read instead.

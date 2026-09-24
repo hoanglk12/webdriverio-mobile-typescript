@@ -29,7 +29,9 @@
     "postinstall": "echo Setup complete. Run 'git init' and 'npx husky install' to enable Git hooks.",
     "clean": "rimraf ./reports ./node_modules/.cache",
     "appium": "appium",
-    "appium:doctor": "appium-doctor"
+    "appium:doctor": "appium-doctor",
+    "rag:start": "scripts\\start-rag.bat",
+    "rag:sync": "node scripts/sync-memory-to-lightrag.mjs"
   },
   "keywords": [
     "webdriverio",

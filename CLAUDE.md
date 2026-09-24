@@ -40,6 +40,18 @@ Enterprise-style Mobile Automation Framework: WebdriverIO 9 + Appium 3 + Mocha +
 | `type-check`                                        | `tsc --noEmit`                                                |
 | `allure:generate` / `allure:open` / `allure:report` | Allure reporting from `reports/allure-results`                |
 | `appium` / `appium:doctor`                          | Run local Appium server / doctor diagnostics                  |
+| `rag:start`                                         | Start the local LightRAG server (`scripts/start-rag.bat`)     |
+| `rag:sync`                                          | Push this project's Claude Code memory notes into LightRAG    |
+
+## LightRAG (local semantic memory search)
+
+A local LightRAG server (Python venv at `.lightrag-venv/`, config in `.lightrag.env`, both gitignored) provides semantic/graph search over this project's Claude Code auto-memory notes — it indexes `~/.claude/projects/{encoded-project-path}/memory/` directly, not an in-repo vault. There is no in-repo memory-vault and no hook automation here (unlike some sibling projects) — indexing is manual and opt-in:
+
+1. `npm run rag:start` — starts the server on `http://localhost:9623` (must stay running in its own terminal).
+2. `npm run rag:sync` — pushes current memory notes into it (no-ops quietly if the server isn't running).
+3. Query via the `mcp__lightrag__*` MCP tools (registered in `.mcp.json`) once the server is up — e.g. `query_document` with `mode: "hybrid"` for cross-note synthesis questions. For simple lookups, plain `Grep`/`Read` over the memory directory is faster and doesn't require the server.
+
+`lightrag-server` requires a root `.env` to exist (it errors into an interactive prompt otherwise) and reads `LOG_LEVEL` from it too, but expects an uppercase Python logging level — `scripts/start-rag.bat` sets `LOG_LEVEL=INFO` before launch specifically to win over `.env.example`'s lowercase `LOG_LEVEL=info` (for Winston). Don't remove that line. `.mcp.json` changes need a new Claude Code session to take effect (no hot-reload).
 
 ## Related project-level skills
 

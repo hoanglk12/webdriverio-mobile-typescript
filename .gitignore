@@ -42,3 +42,8 @@ desktop.ini
 *.tmp
 *.temp
 .cache/
+
+# LightRAG memory index (generated, not committed)
+.lightrag/
+.lightrag-venv/
+.lightrag.env

@@ -71,4 +71,18 @@ export default [
       '@typescript-eslint/no-unused-expressions': 'off',
     },
   },
+  {
+    // Standalone Node ESM utility scripts (e.g. scripts/*.mjs) — not covered by the
+    // `**/*.ts` block above, so they need their own node globals or `process`/`fetch`/
+    // `console` all trip no-undef.
+    files: ['**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.node },
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
 ];

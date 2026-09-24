@@ -82,6 +82,19 @@ export const frontRow = {
    * `evt_005`, tagged J-Pop, exists) — selecting it should show the empty state.
    */
   zeroMatchFilterChipSlug: 'folk',
+
+  /**
+   * SMK-06 fixture: Event Detail fields for the same single seeded event
+   * (`events.item.evt_005`, title = `search.expectedEventTitle`). Verified live via
+   * `adb shell uiautomator dump`, 23 Sep 2026. Artist, date, and venue have no
+   * testID/resource-id on this screen (only title/buyButton/reviewsButton/shareButton
+   * do) — matched by exact rendered text, same strategy as `emptyState` above.
+   */
+  eventDetail: {
+    artist: 'Sora Aoyama',
+    date: 'Tue, Sep 22, 7:00 PM',
+    venue: 'Tokyo Dome · Tokyo, JP',
+  },
 };
 
 /**
